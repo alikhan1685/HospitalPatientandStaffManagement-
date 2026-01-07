@@ -4,11 +4,15 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class MainMenu extends Application {
+
+    private VBox contentArea = new VBox();
+    private BorderPane root = new BorderPane();
 
     @Override
     public void start(Stage stage) {
@@ -16,22 +20,22 @@ public class Main extends Application {
         // ---------------- HAMBURGER BUTTON ----------------
         Label hamburgerBtn = new Label("☰ Menu");
         hamburgerBtn.setStyle(
-                "-fx-font-size: 18px;" +
-                "-fx-padding: 8 15 8 15;" +
+                "-fx-font-size: 13px;" +
+                "-fx-padding: 6 10;" +
                 "-fx-background-color: #34495e;" +
                 "-fx-text-fill: white;" +
                 "-fx-cursor: hand;"
         );
         hamburgerBtn.setOnMouseEntered(e -> hamburgerBtn.setStyle(
-                "-fx-font-size: 18px;" +
-                "-fx-padding: 8 15 8 15;" +
+                "-fx-font-size: 13px;" +
+                "-fx-padding: 6 10;" +
                 "-fx-background-color: #3b5998;" +
                 "-fx-text-fill: white;" +
                 "-fx-cursor: hand;"
         ));
         hamburgerBtn.setOnMouseExited(e -> hamburgerBtn.setStyle(
-                "-fx-font-size: 18px;" +
-                "-fx-padding: 8 15 8 15;" +
+                "-fx-font-size: 13px;" +
+                "-fx-padding: 6 10;" +
                 "-fx-background-color: #34495e;" +
                 "-fx-text-fill: white;" +
                 "-fx-cursor: hand;"
@@ -39,9 +43,15 @@ public class Main extends Application {
 
         // ---------------- SIDE MENU ----------------
         VBox sideMenu = new VBox(0);
-        sideMenu.setPadding(new Insets(15));
         sideMenu.setStyle("-fx-background-color: #2c3e50;");
-        sideMenu.setPrefWidth(240);
+        sideMenu.setPrefWidth(200);  // Reduced width
+
+        // Create scrollable container for menu
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(sideMenu);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: #2c3e50; -fx-border-color: #2c3e50;");
+        scrollPane.setPrefWidth(200);  // Reduced width
 
         // ---------------- MAIN MENU ITEMS ----------------
         Label patientsMenu = new Label("PATIENTS");
@@ -50,83 +60,95 @@ public class Main extends Application {
         Label staffMenu = new Label("STAFF");
 
         for (Label lbl : new Label[]{patientsMenu, treatmentMenu, appointmentMenu, staffMenu}) {
-            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 5 8 10; -fx-cursor: hand;");
-            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #3498db; -fx-font-size: 14px; -fx-padding: 8 5 8 10; -fx-cursor: hand;"));
-            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 5 8 10; -fx-cursor: hand;"));
+            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 6 5 6 10; -fx-cursor: hand;");
+            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #3498db; -fx-font-size: 12px; -fx-padding: 6 5 6 10; -fx-cursor: hand;"));
+            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 6 5 6 10; -fx-cursor: hand;"));
         }
 
         // ---------------- PATIENT OPTIONS ----------------
         VBox patientOptions = new VBox(0);
+        patientOptions.setPadding(new Insets(0, 0, 5, 0));
         Label addPatient = new Label("ADD PATIENT");
         Label getPatient = new Label("GET PATIENT");
         for (Label lbl : new Label[]{addPatient, getPatient}) {
-            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;");
-            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;"));
-            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;"));
+            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;");
+            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
+            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
         }
         patientOptions.getChildren().addAll(addPatient, getPatient);
 
         // ---------------- TREATMENT OPTIONS ----------------
         VBox treatmentOptions = new VBox(0);
-        Label saveTreatment = new Label("SAVE");
+        treatmentOptions.setPadding(new Insets(0, 0, 5, 0));
+        Label addTreatment = new Label("ADD");
         Label updateTreatment = new Label("UPDATE");
-        for (Label lbl : new Label[]{saveTreatment, updateTreatment}) {
-            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;");
-            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #e67e22; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;"));
-            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;"));
+        for (Label lbl : new Label[]{addTreatment, updateTreatment}) {
+            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;");
+            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #e67e22; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
+            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
         }
-        treatmentOptions.getChildren().addAll(saveTreatment, updateTreatment);
+        treatmentOptions.getChildren().addAll(addTreatment, updateTreatment);
 
         // ---------------- APPOINTMENT OPTIONS ----------------
         VBox appointmentOptions = new VBox(0);
+        appointmentOptions.setPadding(new Insets(0, 0, 5, 0));
         Label scheduleAppointment = new Label("SCHEDULE");
         Label cancelAppointment = new Label("CANCEL");
         for (Label lbl : new Label[]{scheduleAppointment, cancelAppointment}) {
-            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;");
-            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #f1c40f; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;"));
-            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;"));
+            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;");
+            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #f1c40f; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
+            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
         }
         appointmentOptions.getChildren().addAll(scheduleAppointment, cancelAppointment);
 
         // ---------------- STAFF OPTIONS ----------------
         VBox staffOptions = new VBox(0);
+        staffOptions.setPadding(new Insets(0, 0, 5, 0));
 
         // Doctor
         Label doctorOption = new Label("DOCTOR");
+        doctorOption.setStyle("-fx-text-fill: #3498db; -fx-font-size: 11px; -fx-padding: 4 5 4 15; -fx-font-weight: bold;");
         VBox doctorOptions = new VBox(0);
-        Label managePatientsDoctor = new Label("AVAILABLE");
-        Label specificationDoctor = new Label("SPECIFICATION");
-        doctorOptions.getChildren().addAll(managePatientsDoctor, specificationDoctor);
+        doctorOptions.setPadding(new Insets(0, 0, 3, 0));
+        Label addDoctor = new Label("ADD");
+        Label availableDoctor = new Label("AVAILABLE");
+        Label assignDoctor = new Label("ASSIGN");
+        for (Label lbl : new Label[]{addDoctor, availableDoctor, assignDoctor}) {
+            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;");
+            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;"));
+            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;"));
+        }
+        doctorOptions.getChildren().addAll(addDoctor, availableDoctor, assignDoctor);
 
         // Nurse
         Label nurseOption = new Label("NURSE");
+        nurseOption.setStyle("-fx-text-fill: #3498db; -fx-font-size: 11px; -fx-padding: 4 5 4 15; -fx-font-weight: bold;");
         VBox nurseOptions = new VBox(0);
+        nurseOptions.setPadding(new Insets(0, 0, 3, 0));
+        Label addNurse = new Label("ADD");
         Label availableNurse = new Label("AVAILABLE");
-        Label managePatientsNurse = new Label("ASSIGN");
-        nurseOptions.getChildren().addAll(availableNurse,managePatientsNurse);
+        Label assignNurse = new Label("ASSIGN");
+        for (Label lbl : new Label[]{addNurse, availableNurse, assignNurse}) {
+            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;");
+            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;"));
+            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;"));
+        }
+        nurseOptions.getChildren().addAll(addNurse, availableNurse, assignNurse);
 
         // Technician
         Label technicianOption = new Label("TECHNICIAN");
+        technicianOption.setStyle("-fx-text-fill: #3498db; -fx-font-size: 11px; -fx-padding: 4 5 4 15; -fx-font-weight: bold;");
         VBox technicianOptions = new VBox(0);
-        Label available2= new Label("AVAILABLE"); // only option
-        technicianOptions.getChildren().add(available2);
-
-        // Apply consistent styling
-        for (Label lbl : new Label[]{
-                managePatientsDoctor, specificationDoctor,
-                managePatientsNurse, availableNurse,
-                available2
-        }) {
-            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;");
-            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;"));
-            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 25; -fx-cursor: hand;"));
+        technicianOptions.setPadding(new Insets(0, 0, 3, 0));
+        Label addTechnician = new Label("ADD");
+        Label assignTechnician = new Label("ASSIGN");
+        Label availableTechnician = new Label("AVAILABLE");
+        for (Label lbl : new Label[]{addTechnician, assignTechnician, availableTechnician}) {
+            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;");
+            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;"));
+            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;"));
         }
-
-        for (Label lbl : new Label[]{doctorOption, nurseOption, technicianOption}) {
-            lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 15; -fx-cursor: hand;");
-            lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 13px; -fx-padding: 4 5 4 15; -fx-cursor: hand;"));
-            lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 4 5 4 15; -fx-cursor: hand;"));
-        }
+        technicianOptions.getChildren().addAll(addTechnician, assignTechnician, availableTechnician);
 
         staffOptions.getChildren().addAll(
                 doctorOption, doctorOptions,
@@ -142,41 +164,124 @@ public class Main extends Application {
                 staffMenu, staffOptions
         );
 
+        // Add padding to the side menu
+        sideMenu.setPadding(new Insets(10, 0, 15, 0));
+
         // ---------------- TOGGLE HAMBURGER MENU ----------------
-        sideMenu.setVisible(false);
-        hamburgerBtn.setOnMouseClicked(e -> sideMenu.setVisible(!sideMenu.isVisible()));
+        scrollPane.setVisible(false);
+        hamburgerBtn.setOnMouseClicked(e -> scrollPane.setVisible(!scrollPane.isVisible()));
+
+        // ---------------- CONTENT AREA ----------------
+        contentArea.setPadding(new Insets(15));
+        contentArea.setStyle("-fx-background-color: #ecf0f1;");
+        contentArea.setSpacing(5);
 
         // ---------------- CLICK EVENTS ----------------
-        addPatient.setOnMouseClicked(e -> System.out.println("Add Patient Panel"));
-        getPatient.setOnMouseClicked(e -> System.out.println("Get Patient Panel"));
+        addPatient.setOnMouseClicked(e -> {
+            AddPatientForm addPatientForm = new AddPatientForm();
+            showContent(addPatientForm.getForm());
+        });
+        
+        getPatient.setOnMouseClicked(e -> {
+            System.out.println("Get Patient Panel");
+            showDefaultContent();
+        });
 
-        saveTreatment.setOnMouseClicked(e -> System.out.println("Save Treatment Action"));
-        updateTreatment.setOnMouseClicked(e -> System.out.println("Update Treatment Action"));
+        // Treatment menu click events
+        addTreatment.setOnMouseClicked(e -> {
+            AddTreatmentForm addTreatmentForm = new AddTreatmentForm();
+            showContent(addTreatmentForm.getForm());
+        });
+        
+        updateTreatment.setOnMouseClicked(e -> {
+            System.out.println("Update Treatment Action");
+            showDefaultContent();
+        });
 
-        scheduleAppointment.setOnMouseClicked(e -> System.out.println("Schedule Appointment Panel"));
-        cancelAppointment.setOnMouseClicked(e -> System.out.println("Cancel Appointment Panel"));
+        scheduleAppointment.setOnMouseClicked(e -> {
+            ScheduleAppointmentForm scheduleForm = new ScheduleAppointmentForm();
+            showContent(scheduleForm.getForm());
+        });
+        
+        cancelAppointment.setOnMouseClicked(e -> {
+            System.out.println("Cancel Appointment Panel");
+            showDefaultContent();
+        });
 
-        managePatientsDoctor.setOnMouseClicked(e -> System.out.println("Manage Patients (Doctor) Panel"));
-        specificationDoctor.setOnMouseClicked(e -> System.out.println("Specification Panel"));
+        // Doctor menu click events
+        addDoctor.setOnMouseClicked(e -> {
+            AddDoctorForm addDoctorForm = new AddDoctorForm();
+            showContent(addDoctorForm.getForm());
+        });
+        
+        availableDoctor.setOnMouseClicked(e -> {
+            System.out.println("Available Doctor Panel");
+            showDefaultContent();
+        });
+        
+        assignDoctor.setOnMouseClicked(e -> {
+            AssignDoctorForm assignDoctorForm = new AssignDoctorForm();
+            showContent(assignDoctorForm.getForm());
+        });
 
-        managePatientsNurse.setOnMouseClicked(e -> System.out.println("Manage Patients (Nurse) Panel"));
-        availableNurse.setOnMouseClicked(e -> System.out.println("Available Nurse Panel"));
+        // Nurse menu click events
+        addNurse.setOnMouseClicked(e -> {
+            AddNurseForm addNurseForm = new AddNurseForm();
+            showContent(addNurseForm.getForm());
+        });
+        
+        availableNurse.setOnMouseClicked(e -> {
+            System.out.println("Available Nurse Panel");
+            showDefaultContent();
+        });
+        
+        assignNurse.setOnMouseClicked(e -> {
+            AssignNurseForm assignNurseForm = new AssignNurseForm();
+            showContent(assignNurseForm.getForm());
+        });
 
-        available2.setOnMouseClicked(e -> System.out.println("Available Technician Panel"));
+        // Technician menu click events
+        addTechnician.setOnMouseClicked(e -> {
+            AddTechnicianForm addTechnicianForm = new AddTechnicianForm();
+            showContent(addTechnicianForm.getForm());
+        });
+        
+        assignTechnician.setOnMouseClicked(e -> {
+            AssignTechnicianForm assignTechnicianForm = new AssignTechnicianForm();
+            showContent(assignTechnicianForm.getForm());
+        });
+        
+        availableTechnician.setOnMouseClicked(e -> {
+            System.out.println("Available Technician Panel");
+            showDefaultContent();
+        });
 
         // ---------------- LAYOUT ----------------
-        BorderPane root = new BorderPane();
         root.setTop(hamburgerBtn);
-        root.setLeft(sideMenu);
+        root.setLeft(scrollPane);
+        root.setCenter(contentArea);
+        
+        showDefaultContent();
 
-        Scene scene = new Scene(root, 450, 500);
-        stage.setTitle("Hospital Management System Menu");
+        Scene scene = new Scene(root, 850, 600);  // Reduced window size
+        stage.setTitle("Hospital Management System");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void showDefaultContent() {
+        contentArea.getChildren().clear();
+        Label welcomeLabel = new Label("Welcome to Hospital Management System");
+        welcomeLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        contentArea.getChildren().add(welcomeLabel);
+    }
+
+    private void showContent(javafx.scene.Parent content) {
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(content);
     }
 
     public static void main(String[] args) {
         launch(args);
     }
 }
-
