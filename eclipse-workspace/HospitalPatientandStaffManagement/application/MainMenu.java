@@ -44,14 +44,14 @@ public class MainMenu extends Application {
         // ---------------- SIDE MENU ----------------
         VBox sideMenu = new VBox(0);
         sideMenu.setStyle("-fx-background-color: #2c3e50;");
-        sideMenu.setPrefWidth(200);  // Reduced width
+        sideMenu.setPrefWidth(200);
 
         // Create scrollable container for menu
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(sideMenu);
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: #2c3e50; -fx-border-color: #2c3e50;");
-        scrollPane.setPrefWidth(200);  // Reduced width
+        scrollPane.setPrefWidth(200);
 
         // ---------------- MAIN MENU ITEMS ----------------
         Label patientsMenu = new Label("PATIENTS");
@@ -183,8 +183,8 @@ public class MainMenu extends Application {
         });
         
         getPatient.setOnMouseClicked(e -> {
-            System.out.println("Get Patient Panel");
-            showDefaultContent();
+            GetPatientForm patientSearchForm = new GetPatientForm();
+            showContent(patientSearchForm.getForm());
         });
 
         // Treatment menu click events
@@ -194,8 +194,8 @@ public class MainMenu extends Application {
         });
         
         updateTreatment.setOnMouseClicked(e -> {
-            System.out.println("Update Treatment Action");
-            showDefaultContent();
+            UpdateTreatmentForm updateTreatmentForm = new UpdateTreatmentForm();
+            showContent(updateTreatmentForm.getForm());
         });
 
         scheduleAppointment.setOnMouseClicked(e -> {
@@ -204,8 +204,8 @@ public class MainMenu extends Application {
         });
         
         cancelAppointment.setOnMouseClicked(e -> {
-            System.out.println("Cancel Appointment Panel");
-            showDefaultContent();
+            CancelAppointmentForm cancelForm = new CancelAppointmentForm();
+            showContent(cancelForm.getForm());
         });
 
         // Doctor menu click events
@@ -215,8 +215,8 @@ public class MainMenu extends Application {
         });
         
         availableDoctor.setOnMouseClicked(e -> {
-            System.out.println("Available Doctor Panel");
-            showDefaultContent();
+            AvailableStaffForm availableDoctors = new AvailableStaffForm("Doctor");
+            showContent(availableDoctors.getForm());
         });
         
         assignDoctor.setOnMouseClicked(e -> {
@@ -231,8 +231,8 @@ public class MainMenu extends Application {
         });
         
         availableNurse.setOnMouseClicked(e -> {
-            System.out.println("Available Nurse Panel");
-            showDefaultContent();
+            AvailableStaffForm availableNurses = new AvailableStaffForm("Nurse");
+            showContent(availableNurses.getForm());
         });
         
         assignNurse.setOnMouseClicked(e -> {
@@ -252,8 +252,8 @@ public class MainMenu extends Application {
         });
         
         availableTechnician.setOnMouseClicked(e -> {
-            System.out.println("Available Technician Panel");
-            showDefaultContent();
+            AvailableStaffForm availableTechnicians = new AvailableStaffForm("Technician");
+            showContent(availableTechnicians.getForm());
         });
 
         // ---------------- LAYOUT ----------------
@@ -263,7 +263,7 @@ public class MainMenu extends Application {
         
         showDefaultContent();
 
-        Scene scene = new Scene(root, 850, 600);  // Reduced window size
+        Scene scene = new Scene(root, 900, 650);
         stage.setTitle("Hospital Management System");
         stage.setScene(scene);
         stage.show();
