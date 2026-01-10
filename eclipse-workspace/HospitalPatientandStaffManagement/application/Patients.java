@@ -1,18 +1,13 @@
 package application;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Patients {
     
     private static final String role = "Patient";
     private List<String> medicalHistory;
     private String assignedDoctorName;
-    private String bloodGroup;
     private boolean admitted;
     private String id;
-    private String emergencyContact;
-    private String email;
     private String name;
     private int age;
     private String gender;
@@ -21,15 +16,12 @@ public class Patients {
     
     // Constructor matching your parameters
     public Patients(String id, String name, int age, boolean admitted, 
-                   String email, String emergencyContact, 
-                   String medicalHistory, String doctorName) {
+                   String medicalHistory, String doctorName) {  // Removed email and emergencyContact
         try {
             this.id = id;
             this.name = name;
             this.age = age;
             this.admitted = admitted;
-            this.email = email;
-            this.emergencyContact = emergencyContact;
             this.assignedDoctorName = doctorName;
             
             // Initialize medicalHistory as ArrayList
@@ -45,21 +37,18 @@ public class Patients {
     
     // Alternative constructor with more fields
     public Patients(String id, String name, int age, String gender, String address, 
-                   String phone, String email, String emergencyContact, 
-                   String bloodGroup, String medicalHistory, String doctorName) {
-        this(id, name, age, false, email, emergencyContact, medicalHistory, doctorName);
+                   String phone, String medicalHistory, String doctorName) {
+        this(id, name, age, false, medicalHistory, doctorName);
         this.gender = gender;
         this.address = address;
         this.phone = phone;
-        this.bloodGroup = bloodGroup;
     }
     
     // Constructor that accepts Person object
-    public Patients(Person person, String bloodGroup, String medicalHistory, String doctorName) {
+    public Patients(Person person, String medicalHistory, String doctorName) {
         this(person.getId(), person.getName(), person.getAge(), 
              person.getGender(), person.getAddress(), person.getPhone(), 
-             person.getEmail(), person.getEmergencyContact(), 
-             bloodGroup, medicalHistory, doctorName);
+             medicalHistory, doctorName);
     }
     
     // Getters and Setters
@@ -111,22 +100,6 @@ public class Patients {
         this.phone = phone;
     }
     
-    public String getEmail() {
-        return email;
-    }
-    
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    
-    public String getEmergencyContact() {
-        return emergencyContact;
-    }
-    
-    public void setEmergencyContact(String emergencyContact) {
-        this.emergencyContact = emergencyContact;
-    }
-    
     public List<String> getMedicalHistory() {
         return medicalHistory;
     }
@@ -149,14 +122,6 @@ public class Patients {
         this.assignedDoctorName = doctorName;
     }
     
-    public String getBloodGroup() {
-        return bloodGroup;
-    }
-    
-    public void setBloodGroup(String bloodGroup) {
-        this.bloodGroup = bloodGroup;
-    }
-    
     public boolean isAdmitted() {
         return admitted;
     }
@@ -169,7 +134,7 @@ public class Patients {
         return role;
     }
     
-    // Display patient information
+    // Display Information
     public void displayInfo() {
         try {
             System.out.println("\n=== PATIENT INFORMATION ===");
@@ -179,9 +144,6 @@ public class Patients {
             System.out.println("Gender: " + (this.gender != null ? this.gender : "Not specified"));
             System.out.println("Address: " + (this.address != null ? this.address : "Not specified"));
             System.out.println("Phone: " + (this.phone != null ? this.phone : "Not specified"));
-            System.out.println("Email: " + (this.email != null ? this.email : "Not specified"));
-            System.out.println("Emergency Contact: " + (this.emergencyContact != null ? this.emergencyContact : "Not specified"));
-            System.out.println("Blood Group: " + (this.bloodGroup != null ? this.bloodGroup : "Not specified"));
             System.out.println("Status: " + (this.admitted ? "ADMITTED" : "NOT ADMITTED"));
             System.out.println("Assigned Doctor: " + (this.assignedDoctorName != null ? this.assignedDoctorName : "Not assigned"));
             
@@ -193,7 +155,6 @@ public class Patients {
                     System.out.println("  " + (i + 1) + ". " + this.medicalHistory.get(i));
                 }
             }
-            
             System.out.println("=============================\n");
             
         } catch (Exception e) {
@@ -220,25 +181,24 @@ public class Patients {
     }
     
     // Get patient summary for quick view
-    public String getPatientSummary() {
+    public String getPatientDetail() {
         return String.format("ID: %s | Name: %s | Age: %d | Status: %s | Doctor: %s",
                 this.id,
                 this.name,
                 this.age,
-                this.admitted ? "Admitted" : "Outpatient",
+                this.admitted ? "Admitted" : "Outpatient", 
                 this.assignedDoctorName != null ? this.assignedDoctorName : "Unassigned");
     }
     
     @Override
     public String toString() {
-        return getPatientSummary();
+        return getPatientDetail();
     }
     
     // Validation method
     public boolean isValidPatient() {
         return this.id != null && !this.id.isEmpty() &&
                this.name != null && !this.name.isEmpty() &&
-               this.age > 0 && this.age < 150 &&
-               this.emergencyContact != null && !this.emergencyContact.isEmpty();
+               this.age > 0 && this.age < 150;
     }
 }
