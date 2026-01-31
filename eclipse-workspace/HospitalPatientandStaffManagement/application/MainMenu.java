@@ -194,7 +194,7 @@ public class MainMenu extends Application {
         });
         
         updateTreatment.setOnMouseClicked(e -> {
-            UpdateTreatmentForm updateTreatmentForm = new UpdateTreatmentForm();
+        	CurrentTreatmentForm updateTreatmentForm = new CurrentTreatmentForm();
             showContent(updateTreatmentForm.getForm());
         });
 

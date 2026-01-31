@@ -19,12 +19,14 @@ public class AddTreatmentForm {
     private TextArea treatmentPlanArea;
     private TextArea medicationsArea;
     private PatientDatabase patientDatabase;
-    
+    private TreatmentDatabase treatmentDatabase;
+
     public AddTreatmentForm() {
         patientDatabase = PatientDatabase.getInstance();
+        treatmentDatabase = TreatmentDatabase.getInstance(); 
         initializeForm();
     }
-    
+
     private void initializeForm() {
         // Create form container
         formContainer = new VBox();
@@ -223,6 +225,7 @@ public class AddTreatmentForm {
         formContainer.getChildren().addAll(title, form, buttonContainer);
     }
     
+    
     private TextField createTextField(double width, String prompt) {
         TextField field = new TextField();
         field.setPrefWidth(width);
@@ -282,6 +285,7 @@ public class AddTreatmentForm {
     }
     
     private boolean saveTreatment(TextField durationField, TextField frequencyField, Label validationLabel) {
+    	
         // First validate the patient exists
         String patientId = patientIdField.getText().trim();
         String patientName = patientNameField.getText();
@@ -320,6 +324,20 @@ public class AddTreatmentForm {
             System.out.println("Start Date: " + startDate);
             System.out.println("Duration: " + duration);
             System.out.println("Frequency: " + frequency);
+            
+            Treatments treatment = new Treatments(
+            	    treatmentId,
+            	    patientId,
+            	    patientName,
+            	    doctor,
+            	    treatmentType,
+            	    duration,
+            	    "Active"
+            	);
+
+            	// ✅ SAVE INTO DATABASE
+            	treatmentDatabase.addTreatment(treatment);
+
             
             System.out.println("\n--- TREATMENT PLAN ---");
             System.out.println(treatmentPlan);
