@@ -8,56 +8,47 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
 public class AddNurseForm {
-    
     private VBox formContainer;
     private TextField nameField;
     private TextField ageField;
     private ComboBox<String> genderComboBox;
-    private TextField phoneField;
-    private TextField licenseField;
     private ComboBox<String> specializationComboBox;
     private ComboBox<String> departmentComboBox;
-    private ComboBox<String> doctorComboBox;
+    private ComboBox<String> shiftComboBox;
+    private TextField experienceField;
+    private TextField phoneField;
+    private TextField licenseField;
+    private TextField qualificationField;
     
     public AddNurseForm() {
         initializeForm();
     }
     
     private void initializeForm() {
-        // Create form container
         formContainer = new VBox();
-        formContainer.setSpacing(15);
+        formContainer.setSpacing(20);
         formContainer.setPadding(new Insets(20));
         formContainer.setStyle("-fx-background-color: #f8f9fa;");
         
         // Title
         Label title = new Label("Add New Nurse");
-        title.setFont(new Font("Arial", 24));
+        title.setFont(new Font("Arial", 28));
         title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
         
         // Create form grid
         GridPane form = new GridPane();
-        form.setVgap(12);
-        form.setHgap(15);
-        form.setPadding(new Insets(20));
+        form.setVgap(15);
+        form.setHgap(20);
+        form.setPadding(new Insets(25));
         form.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8; -fx-border-width: 1;");
         
         // Initialize form fields
-        nameField = new TextField();
-        nameField.setPromptText("Enter full name");
-        nameField.setPrefWidth(250);
-        
-        ageField = new TextField();
-        ageField.setPromptText("Age");
-        ageField.setPrefWidth(80);
-        
-        phoneField = new TextField();
-        phoneField.setPromptText("Phone number");
-        phoneField.setPrefWidth(200);
-        
-        licenseField = new TextField();
-        licenseField.setPromptText("License number");
-        licenseField.setPrefWidth(200);
+        nameField = createTextField(300, "Enter full name");
+        ageField = createTextField(100, "Age");
+        experienceField = createTextField(100, "Years of experience");
+        phoneField = createTextField(200, "Phone number");
+        licenseField = createTextField(200, "Nursing license number");
+        qualificationField = createTextField(250, "e.g., BSN, RN, LPN");
         
         // Gender ComboBox
         genderComboBox = new ComboBox<>();
@@ -68,127 +59,140 @@ public class AddNurseForm {
         // Specialization ComboBox
         specializationComboBox = new ComboBox<>();
         specializationComboBox.getItems().addAll(
-            "General Ward Nurse",
-            "ICU Nurse",
-            "Emergency Room Nurse",
-            "Pediatric Nurse",
-            "Maternity Nurse",
-            "Operation Theater Nurse"
+            "General Nursing",
+            "Pediatric Nursing", 
+            "Critical Care Nursing",
+            "Surgical Nursing",
+            "Emergency Nursing",
+            "Cardiac Nursing",
+            "Neurology Nursing",
+            "Oncology Nursing",
+            "Geriatric Nursing",
+            "Psychiatric Nursing",
+            "Neonatal Nursing"
         );
         specializationComboBox.setPromptText("Select specialization");
-        specializationComboBox.setPrefWidth(200);
+        specializationComboBox.setPrefWidth(250);
         
         // Department ComboBox
         departmentComboBox = new ComboBox<>();
         departmentComboBox.getItems().addAll(
+            "General Ward",
+            "Pediatrics Department",
             "Intensive Care Unit (ICU)",
+            "Surgery Department",
             "Emergency Department",
-            "Pediatrics",
+            "Cardiology Department",
             "Maternity Ward",
-            "Operating Theater",
-            "General Ward"
+            "Orthopedics Department",
+            "Oncology Department",
+            "Psychiatry Department"
         );
         departmentComboBox.setPromptText("Select department");
-        departmentComboBox.setPrefWidth(200);
+        departmentComboBox.setPrefWidth(250);
         
-        // Doctor ComboBox for "Assist with Doctor"
-        doctorComboBox = new ComboBox<>();
-        doctorComboBox.getItems().addAll(
-            "Select a doctor",
-            "Dr. Smith (Cardiology)",
-            "Dr. Johnson (Pediatrics)",
-            "Dr. Williams (Surgery)",
-            "Dr. Brown (Neurology)",
-            "Dr. Davis (Orthopedics)",
-            "Dr. Miller (Emergency)"
+        // Shift ComboBox
+        shiftComboBox = new ComboBox<>();
+        shiftComboBox.getItems().addAll(
+            "Day Shift (7 AM - 3 PM)",
+            "Evening Shift (3 PM - 11 PM)",
+            "Night Shift (11 PM - 7 AM)",
+            "Morning Shift (6 AM - 2 PM)",
+            "Afternoon Shift (2 PM - 10 PM)",
+            "Rotational Shift"
         );
-        doctorComboBox.setValue("Select a doctor");
-        doctorComboBox.setPrefWidth(200);
+        shiftComboBox.setValue("Day Shift (7 AM - 3 PM)");
+        shiftComboBox.setPrefWidth(200);
         
         // Add labels and fields to grid
         int row = 0;
         
-        // Row 0: Full Name
-        Label nameLabel = new Label("Full Name:*");
-        nameLabel.setStyle("-fx-font-weight: bold;");
-        form.add(nameLabel, 0, row);
+        form.add(createLabel("Full Name:*"), 0, row);
         form.add(nameField, 1, row);
         row++;
         
-        // Row 1: Age
-        Label ageLabel = new Label("Age:*");
-        ageLabel.setStyle("-fx-font-weight: bold;");
-        form.add(ageLabel, 0, row);
+        form.add(createLabel("Age:*"), 0, row);
         form.add(ageField, 1, row);
+        form.add(createLabel("Gender:*"), 2, row);
+        form.add(genderComboBox, 3, row);
         row++;
         
-        // Row 2: Gender
-        Label genderLabel = new Label("Gender:*");
-        genderLabel.setStyle("-fx-font-weight: bold;");
-        form.add(genderLabel, 0, row);
-        form.add(genderComboBox, 1, row);
-        row++;
-        
-        // Row 3: Phone
-        Label phoneLabel = new Label("Phone:*");
-        phoneLabel.setStyle("-fx-font-weight: bold;");
-        form.add(phoneLabel, 0, row);
-        form.add(phoneField, 1, row);
-        row++;
-        
-        // Row 4: License Number
-        Label licenseLabel = new Label("License Number:*");
-        licenseLabel.setStyle("-fx-font-weight: bold;");
-        form.add(licenseLabel, 0, row);
-        form.add(licenseField, 1, row);
-        row++;
-        
-        // Row 5: Specialization
-        Label specializationLabel = new Label("Specialization:*");
-        specializationLabel.setStyle("-fx-font-weight: bold;");
-        form.add(specializationLabel, 0, row);
+        form.add(createLabel("Specialization:*"), 0, row);
         form.add(specializationComboBox, 1, row);
+        form.add(createLabel("Department:*"), 2, row);
+        form.add(departmentComboBox, 3, row);
         row++;
         
-        // Row 6: Department
-        Label departmentLabel = new Label("Department:*");
-        departmentLabel.setStyle("-fx-font-weight: bold;");
-        form.add(departmentLabel, 0, row);
-        form.add(departmentComboBox, 1, row);
+        form.add(createLabel("Experience (Years):*"), 0, row);
+        form.add(experienceField, 1, row);
+        form.add(createLabel("Shift:*"), 2, row);
+        form.add(shiftComboBox, 3, row);
         row++;
         
-        // Row 7: Assist with Doctor
-        Label doctorLabel = new Label("Assist with Doctor:");
-        doctorLabel.setStyle("-fx-font-weight: bold;");
-        form.add(doctorLabel, 0, row);
-        form.add(doctorComboBox, 1, row);
+        form.add(createLabel("Phone:*"), 0, row);
+        form.add(phoneField, 1, row);
+        form.add(createLabel("License Number:*"), 2, row);
+        form.add(licenseField, 3, row);
+        row++;
+        
+        form.add(createLabel("Qualification:*"), 0, row);
+        form.add(qualificationField, 1, row);
+        row++;
+        
+        form.add(createLabel("Address:"), 0, row);
+        TextField addressField = createTextField(250, "Hospital/residential address");
+        form.add(addressField, 1, row, 3, 1);
+        row++;
+        
+        form.add(createLabel("Certifications:"), 0, row);
+        TextField certificationsField = createTextField(300, "e.g., CPR, BLS, ACLS (comma separated)");
+        form.add(certificationsField, 1, row, 3, 1);
         row++;
         
         // Form validation message
         Label validationLabel = new Label();
         validationLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 12px;");
-        form.add(validationLabel, 0, row, 2, 1);
+        form.add(validationLabel, 1, row, 3, 1);
         
         // Button container
         HBox buttonContainer = new HBox(15);
         buttonContainer.setPadding(new Insets(20, 0, 0, 0));
         
-        // Add Nurse Button
+        // Add Nurse button
         Button addButton = new Button("Add Nurse");
-        addButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
+        addButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         addButton.setOnAction(e -> {
-            if (addNurse(validationLabel)) {
+            if (saveNurse(addressField, certificationsField, validationLabel)) {
                 showSuccessAlert();
             }
         });
         
-        buttonContainer.getChildren().add(addButton);
+        // Clear button
+        Button clearButton = new Button("Clear Form");
+        clearButton.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
+        clearButton.setOnAction(e -> {
+            clearForm(addressField, certificationsField);
+            validationLabel.setText("");
+        });
         
-        // Add components to container
+        buttonContainer.getChildren().addAll(addButton, clearButton);
         formContainer.getChildren().addAll(title, form, buttonContainer);
     }
     
-    private boolean addNurse(Label validationLabel) {
+    private TextField createTextField(double width, String prompt) {
+        TextField field = new TextField();
+        field.setPrefWidth(width);
+        field.setPromptText(prompt);
+        return field;
+    }
+    
+    private Label createLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        return label;
+    }
+    
+    private boolean saveNurse(TextField addressField, TextField certificationsField, Label validationLabel) {
         if (!validateForm()) {
             validationLabel.setText("Please fill in all required fields (*)");
             return false;
@@ -199,15 +203,24 @@ public class AddNurseForm {
             String name = nameField.getText();
             int age = Integer.parseInt(ageField.getText());
             String gender = genderComboBox.getValue();
-            String phone = phoneField.getText();
-            String license = licenseField.getText();
             String specialization = specializationComboBox.getValue();
             String department = departmentComboBox.getValue();
-            String assignedDoctor = doctorComboBox.getValue();
+            String shift = shiftComboBox.getValue();
+            int experience = Integer.parseInt(experienceField.getText());
+            String phone = phoneField.getText();
+            String license = licenseField.getText();
+            String qualification = qualificationField.getText();
+            String address = addressField.getText();
+            String certifications = certificationsField.getText();
             
             // Validate data
             if (age < 21 || age > 65) {
-                validationLabel.setText("Age must be between 21 and 65");
+                validationLabel.setText("Nurse age must be between 21 and 65");
+                return false;
+            }
+            
+            if (experience < 0 || experience > 40) {
+                validationLabel.setText("Experience must be between 0 and 40 years");
                 return false;
             }
             
@@ -216,34 +229,51 @@ public class AddNurseForm {
                 return false;
             }
             
-            // Create nurse and add to AvailableStaffForm
-            String nurseId = "NUR-" + String.format("%03d", (AvailableStaffForm.getNurseCount() + 1));
-            Nurses newNurse = new Nurses(nurseId, name, "Available", phone, department);
+            // Generate nurse ID
+            String nurseId = "NUR-" + (name.hashCode() % 10000);
             
-            // Add to available staff system
-            AvailableStaffForm.addNurse(newNurse);
+            // Create Nurse object
+            Nurses nurse = new Nurses(
+                nurseId,
+                name,
+                age,
+                specialization,
+                qualification,
+                experience,
+                license,
+                gender,
+                address,
+                phone,
+                department
+            );
             
-            // Display saved information
-            System.out.println("\n=== NURSE ADDED SUCCESSFULLY ===");
-            System.out.println("Nurse ID: " + nurseId);
-            System.out.println("Name: " + name);
-            System.out.println("Age: " + age);
-            System.out.println("Gender: " + gender);
-            System.out.println("Phone: " + phone);
-            System.out.println("License Number: " + license);
-            System.out.println("Specialization: " + specialization);
-            System.out.println("Department: " + department);
-            System.out.println("Assisting Doctor: " + assignedDoctor);
-            System.out.println("=== END ===");
+            // Set additional properties
+            nurse.setShift(shift);
+            nurse.setCertifications(certifications);
+            nurse.setDepartment(department);
+            nurse.setStatus("Available");
+            
+            // Save to database
+            NurseDatabase.getInstance().addNurse(nurse);
+            
+            // Display success message
+            System.out.println("\n" + "=".repeat(50));
+            System.out.println("NURSE ADDED TO DATABASE");
+            System.out.println("=".repeat(50));
+         //   nurse.displayInfo();
+            System.out.println("=".repeat(50));
+            
+            // Show database status
+            NurseDatabase.getInstance().printAllNurses();
             
             // Clear form
-            clearForm();
             validationLabel.setText("");
+            clearForm(addressField, certificationsField);
             
             return true;
             
         } catch (NumberFormatException e) {
-            validationLabel.setText("Age must be a valid number");
+            validationLabel.setText("Age and Experience must be valid numbers");
             return false;
         } catch (Exception e) {
             validationLabel.setText("An error occurred: " + e.getMessage());
@@ -255,28 +285,40 @@ public class AddNurseForm {
         return !nameField.getText().isEmpty() &&
                !ageField.getText().isEmpty() &&
                genderComboBox.getValue() != null &&
+               specializationComboBox.getValue() != null &&
+               departmentComboBox.getValue() != null &&
+               shiftComboBox.getValue() != null &&
+               !experienceField.getText().isEmpty() &&
                !phoneField.getText().isEmpty() &&
                !licenseField.getText().isEmpty() &&
-               specializationComboBox.getValue() != null &&
-               departmentComboBox.getValue() != null;
+               !qualificationField.getText().isEmpty();
     }
     
-    private void clearForm() {
+    private void clearForm(TextField addressField, TextField certificationsField) {
         nameField.clear();
         ageField.clear();
         genderComboBox.setValue(null);
-        phoneField.clear();
-        licenseField.clear();
         specializationComboBox.setValue(null);
         departmentComboBox.setValue(null);
-        doctorComboBox.setValue("Select a doctor");
+        shiftComboBox.setValue("Day Shift (7 AM - 3 PM)");
+        experienceField.clear();
+        phoneField.clear();
+        licenseField.clear();
+        qualificationField.clear();
+        addressField.clear();
+        certificationsField.clear();
     }
     
     private void showSuccessAlert() {
+        int totalNurses = NurseDatabase.getInstance().getNurseCount();
+        int availableNurses = NurseDatabase.getInstance().getAvailableNurseCount();
+        
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText("Nurse Added Successfully");
-        alert.setContentText("Nurse has been added to the system and is now available in the Available Nurses list.");
+        alert.setContentText("Nurse has been added to the nursing database.\n\n" +
+                           "Total nurses: " + totalNurses + "\n" +
+                           "Available nurses: " + availableNurses);
         alert.showAndWait();
     }
     

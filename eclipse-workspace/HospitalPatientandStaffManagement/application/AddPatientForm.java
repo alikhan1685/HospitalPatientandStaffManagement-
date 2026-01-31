@@ -88,13 +88,7 @@ public class AddPatientForm {
         
         form.add(createLabel("Phone:*"), 0, row);
         form.add(phoneField, 1, row++);
-        
-        form.add(createLabel("Email:"), 0, row);
-        form.add(emailField, 1, row++);
-        
-        form.add(createLabel("Emergency Contact:*"), 0, row);
-        form.add(emergencyContactField, 1, row++);
-        
+   
         form.add(createLabel("Blood Group:"), 0, row);
         form.add(bloodGroupField, 1, row++);
         
@@ -138,11 +132,11 @@ public class AddPatientForm {
     
     private void initializeDoctorComboBox() {
         List<String> doctors = Arrays.asList(
-            "Dr. Smith - Cardiology",
-            "Dr. Johnson - Neurology", 
-            "Dr. Williams - Pediatrics",
-            "Dr. Davis - Orthopedics",
-            "Dr. Miller - Dermatology"
+            "Dr. Ahmed Khan - Cardiology",
+            "Dr. Farooq - Neurology", 
+            "Dr. Aleem - Pediatrics",
+            "Dr. Mahmood - Orthopedics",
+            "Dr. Alizay- Dermatology"
         );
         assignDoctorComboBox.getItems().addAll(doctors);
     }
@@ -159,7 +153,7 @@ public class AddPatientForm {
         label.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
         return label;
     }
-    
+  
     private boolean savePatient(Label validationLabel) {
         if (!validateForm()) {
             validationLabel.setText("Please fill in all required fields (*)");
@@ -190,7 +184,17 @@ public class AddPatientForm {
                 return false;
             }
             
-            // Create Person object
+           // if (!emergencyContact.matches("\\d{10,}")) {
+             //   validationLabel.setText("Emergency contact must contain at least 10 digits");
+               // return false;
+          //  }
+            
+            if (!email.isEmpty() && !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                validationLabel.setText("Please enter a valid email address (or leave empty)");
+                return false;
+            }
+            
+         
             Person person = new Person(name, age, gender, address, phone, email, emergencyContact);
             
             // Create Patient object
@@ -201,27 +205,31 @@ public class AddPatientForm {
                 person.getGender(),
                 person.getAddress(),
                 person.getPhone(),
-                person.getEmail(),
-                person.getEmergencyContact(),
-                bloodGroup,
-                medicalHistory,
-                doctor
+                person.getbloodGroup(),
+                person.getmedicalHistory()
             );
             
-            // Display saved information
+            // ADD THE PATIENT TO THE DATABASE
+            PatientDatabase.getInstance().addPatient(patient);
+            
+            // Display saved information in console
             System.out.println("\n=== PATIENT SAVED SUCCESSFULLY ===");
             System.out.println("Patient ID: " + patient.getId());
             System.out.println("Name: " + patient.getName());
             System.out.println("Age: " + patient.getAge());
             System.out.println("Gender: " + patient.getGender());
             System.out.println("Phone: " + patient.getPhone());
+            System.out.println("Address: " + patient.getAddress());
             System.out.println("Assigned Doctor: " + patient.getAssignedDoctorName());
             System.out.println("Blood Group: " + patient.getBloodGroup());
+            System.out.println("Medical History: " + patient.getMedicalHistory());
+            
+            // Display database status
+            System.out.println("Total patients in database: " + PatientDatabase.getInstance().getAllPatients().size());
             System.out.println("=== END ===");
             
             // Clear validation message
             validationLabel.setText("");
-            clearForm();
             
             return true;
             
@@ -237,7 +245,6 @@ public class AddPatientForm {
                genderComboBox.getValue() != null &&
                !addressField.getText().isEmpty() &&
                !phoneField.getText().isEmpty() &&
-               !emergencyContactField.getText().isEmpty() &&
                assignDoctorComboBox.getValue() != null;
     }
     
@@ -247,8 +254,6 @@ public class AddPatientForm {
         genderComboBox.setValue(null);
         addressField.clear();
         phoneField.clear();
-        emailField.clear();
-        emergencyContactField.clear();
         bloodGroupField.clear();
         assignDoctorComboBox.setValue(null);
         medicalHistoryArea.clear();

@@ -4,304 +4,297 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
-import java.time.LocalDate;
+import java.util.List;
 
 public class AssignDoctorForm {
-    
     private VBox formContainer;
-    private TextField patientIdField;
-    private TextField patientNameField;
-    private ComboBox<String> doctorComboBox;
-    private ComboBox<String> assignmentTypeComboBox;
-    private ComboBox<String> departmentComboBox;
-    private DatePicker startDatePicker;
-    private TextArea medicalHistoryArea;
-    private TextArea notesArea;
+    private TextArea doctorsArea;
+    private ComboBox<String> filterComboBox;
+    private DoctorDatabase doctorDatabase;
     
     public AssignDoctorForm() {
+        doctorDatabase = DoctorDatabase.getInstance();
         initializeForm();
     }
     
     private void initializeForm() {
-        // Create form container
         formContainer = new VBox();
         formContainer.setSpacing(20);
         formContainer.setPadding(new Insets(20));
         formContainer.setStyle("-fx-background-color: #f8f9fa;");
         
         // Title
-        Label title = new Label("Assign Doctor to Patient");
+        Label title = new Label("Available Doctors");
         title.setFont(new Font("Arial", 28));
-        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 10 0;");
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
         
-        // Create form grid
-        GridPane form = new GridPane();
-        form.setVgap(15);
-        form.setHgap(20);
-        form.setPadding(new Insets(25));
-        form.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8; -fx-border-width: 1;");
+        // Stats Panel
+        HBox statsPanel = new HBox(20);
+        statsPanel.setPadding(new Insets(10));
+        statsPanel.setStyle("-fx-background-color: #2c3e50; -fx-background-radius: 8;");
         
-        // Initialize form fields
-        patientIdField = createTextField(200, "Enter patient ID");
-        patientNameField = createTextField(250, "Patient name (auto-filled)");
-        patientNameField.setEditable(false);
-        patientNameField.setStyle("-fx-background-color: #ecf0f1;");
+        Label totalDoctorsLabel = new Label();
+        Label availableDoctorsLabel = new Label();
+        updateStatsLabels(totalDoctorsLabel, availableDoctorsLabel);
         
-        // Doctor ComboBox
-        doctorComboBox = new ComboBox<>();
-        doctorComboBox.getItems().addAll(
-            "Dr. Smith - Cardiology (Available: Mon-Fri, 9 AM - 5 PM)",
-            "Dr. Johnson - Neurology (Available: Mon-Wed, 10 AM - 4 PM)",
-            "Dr. Williams - Pediatrics (Available: Tue-Thu, 8 AM - 6 PM)",
-            "Dr. Brown - Orthopedics (Available: Mon-Fri, 9 AM - 3 PM)",
-            "Dr. Davis - General Medicine (Available: Daily, 8 AM - 8 PM)",
-            "Dr. Miller - Dermatology (Available: Wed-Fri, 11 AM - 7 PM)",
-            "Dr. Wilson - Surgery (Available: Mon, Wed, Fri, 9 AM - 1 PM)",
-            "Dr. Taylor - Gynecology (Available: Tue, Thu, 10 AM - 6 PM)",
-            "Dr. Anderson - Psychiatry (Available: Mon-Fri, 9 AM - 5 PM)",
-            "Dr. Thomas - Ophthalmology (Available: Wed-Sat, 9 AM - 4 PM)"
+        totalDoctorsLabel.setStyle("-fx-text-fill: #ecf0f1; -fx-font-size: 14px; -fx-font-weight: bold;");
+        availableDoctorsLabel.setStyle("-fx-text-fill: #2ecc71; -fx-font-size: 14px; -fx-font-weight: bold;");
+        
+        statsPanel.getChildren().addAll(totalDoctorsLabel, availableDoctorsLabel);
+        
+        // Filter Panel
+        HBox filterPanel = new HBox(10);
+        filterPanel.setPadding(new Insets(10));
+        
+        filterComboBox = new ComboBox<>();
+        filterComboBox.getItems().addAll(
+            "All Doctors",
+            "Available Only",
+            "By Specialization",
+            "Active Status"
         );
-        doctorComboBox.setPromptText("Select doctor");
-        doctorComboBox.setPrefWidth(350);
+        filterComboBox.setValue("Available Only");
+        filterComboBox.setPrefWidth(150);
         
-        // Assignment Type ComboBox
-        assignmentTypeComboBox = new ComboBox<>();
-        assignmentTypeComboBox.getItems().addAll(
-            "Primary Care Physician",
-            "Consulting Specialist",
-            "Emergency Care",
-            "Post-Operative Care",
-            "Chronic Disease Management",
-            "Preventive Care",
-            "Surgical Team",
-            "Therapy Management"
-        );
-        assignmentTypeComboBox.setPromptText("Select assignment type");
-        assignmentTypeComboBox.setPrefWidth(250);
+        ComboBox<String> specializationComboBox = new ComboBox<>();
+        List<String> specializations = doctorDatabase.getAllSpecializations();
+        specializationComboBox.getItems().addAll("All Specializations");
+        specializationComboBox.getItems().addAll(specializations);
+        specializationComboBox.setValue("All Specializations");
+        specializationComboBox.setPrefWidth(180);
         
-        // Department ComboBox
-        departmentComboBox = new ComboBox<>();
-        departmentComboBox.getItems().addAll(
-            "Cardiology Department",
-            "Neurology Department",
-            "Pediatrics Department",
-            "Orthopedics Department",
-            "General Medicine",
-            "Surgery Department",
-            "Emergency Department",
-            "Intensive Care Unit (ICU)"
-        );
-        departmentComboBox.setPromptText("Select department");
-        departmentComboBox.setPrefWidth(250);
-        
-        // Date Picker
-        startDatePicker = new DatePicker();
-        startDatePicker.setValue(LocalDate.now());
-        startDatePicker.setPrefWidth(150);
-        
-        // Text Areas
-        medicalHistoryArea = new TextArea();
-        medicalHistoryArea.setPrefRowCount(3);
-        medicalHistoryArea.setPrefWidth(300);
-        medicalHistoryArea.setPromptText("Relevant medical history...");
-        medicalHistoryArea.setWrapText(true);
-        
-        notesArea = new TextArea();
-        notesArea.setPrefRowCount(3);
-        notesArea.setPrefWidth(300);
-        notesArea.setPromptText("Additional notes...");
-        notesArea.setWrapText(true);
-        
-        // Add event listener for patient ID field
-        patientIdField.setOnKeyReleased(e -> {
-            String patientId = patientIdField.getText().trim();
-            if (!patientId.isEmpty()) {
-                patientNameField.setText(getPatientName(patientId));
-            } else {
-                patientNameField.clear();
-            }
+        Button filterButton = new Button("Apply Filter");
+        filterButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        filterButton.setOnAction(e -> {
+            String filterType = filterComboBox.getValue();
+            String specialization = specializationComboBox.getValue();
+            displayDoctors(filterType, specialization);
         });
         
-        // Add labels and fields to grid
-        int row = 0;
-        
-        // Row 0: Patient Information
-        form.add(createLabel("Patient ID:*"), 0, row);
-        form.add(patientIdField, 1, row);
-        form.add(createLabel("Patient Name:"), 2, row);
-        form.add(patientNameField, 3, row);
-        row++;
-        
-        // Row 1: Doctor Selection
-        form.add(createLabel("Doctor:*"), 0, row);
-        form.add(doctorComboBox, 1, row, 3, 1);
-        row++;
-        
-        // Row 2: Assignment Details
-        form.add(createLabel("Assignment Type:*"), 0, row);
-        form.add(assignmentTypeComboBox, 1, row);
-        form.add(createLabel("Department:*"), 2, row);
-        form.add(departmentComboBox, 3, row);
-        row++;
-        
-        // Row 3: Start Date
-        form.add(createLabel("Start Date:*"), 0, row);
-        form.add(startDatePicker, 1, row);
-        row++;
-        
-        // Row 4: Medical History
-        form.add(createLabel("Medical History:"), 0, row);
-        form.add(medicalHistoryArea, 1, row, 3, 1);
-        row++;
-        
-        // Row 5: Notes
-        form.add(createLabel("Notes:"), 0, row);
-        form.add(notesArea, 1, row, 3, 1);
-        row++;
-        
-        // Form validation message
-        Label validationLabel = new Label();
-        validationLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 12px;");
-        form.add(validationLabel, 1, row, 3, 1);
-        
-        // Button container
-        HBox buttonContainer = new HBox(15);
-        buttonContainer.setPadding(new Insets(20, 0, 0, 0));
-        
-        // Assign button
-        Button assignButton = new Button("👨‍⚕️ Assign Doctor");
-        assignButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
-        assignButton.setOnAction(e -> {
-            if (assignDoctor(validationLabel)) {
-                showSuccessAlert();
-            }
+        Button refreshButton = new Button("🔄 Refresh");
+        refreshButton.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold;");
+        refreshButton.setOnAction(e -> {
+            updateStatsLabels(totalDoctorsLabel, availableDoctorsLabel);
+            displayDoctors("Available Only", "All Specializations");
         });
         
-        // Clear button
-        Button clearButton = new Button("Clear Form");
-        clearButton.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
-        clearButton.setOnAction(e -> {
-            clearForm();
-            validationLabel.setText("");
-        });
+        filterPanel.getChildren().addAll(
+            new Label("Filter:"), filterComboBox,
+            new Label("Specialization:"), specializationComboBox,
+            filterButton, refreshButton
+        );
         
-        buttonContainer.getChildren().addAll(assignButton, clearButton);
+        // Doctors Display Area
+        doctorsArea = new TextArea();
+        doctorsArea.setPrefRowCount(20);
+        doctorsArea.setEditable(false);
+        doctorsArea.setWrapText(true);
+        doctorsArea.setStyle("-fx-font-family: 'Monospaced'; -fx-font-size: 12px;");
         
-        // Add components to container
-        formContainer.getChildren().addAll(title, form, buttonContainer);
+        ScrollPane scrollPane = new ScrollPane(doctorsArea);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8;");
+        
+        // Action Buttons
+        HBox actionPanel = new HBox(15);
+        actionPanel.setPadding(new Insets(10));
+        
+        Button viewAllButton = new Button("View All Doctors");
+        viewAllButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;");
+        viewAllButton.setOnAction(e -> displayAllDoctors());
+        
+        Button viewAvailableButton = new Button("View Available");
+        viewAvailableButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;");
+        viewAvailableButton.setOnAction(e -> displayAvailableDoctors());
+        
+        Button updateStatusButton = new Button("Update Status");
+        updateStatusButton.setStyle("-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;");
+        updateStatusButton.setOnAction(e -> showStatusUpdateDialog());
+        
+        actionPanel.getChildren().addAll(viewAllButton, viewAvailableButton, updateStatusButton);
+        
+        // Add components
+        formContainer.getChildren().addAll(
+            title, statsPanel, filterPanel, scrollPane, actionPanel
+        );
+        
+        // Display initial data
+        displayAvailableDoctors();
     }
     
-    private TextField createTextField(double width, String prompt) {
-        TextField field = new TextField();
-        field.setPrefWidth(width);
-        field.setPromptText(prompt);
-        return field;
+    private void updateStatsLabels(Label totalLabel, Label availableLabel) {
+        int total = doctorDatabase.getDoctorCount();
+        int available = doctorDatabase.getAvailableDoctorCount();
+        
+        totalLabel.setText("Total Doctors: " + total);
+        availableLabel.setText("Available Now: " + available);
     }
     
-    private Label createLabel(String text) {
-        Label label = new Label(text);
-        label.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-        return label;
-    }
-    
-    private String getPatientName(String patientId) {
-        switch (patientId.toUpperCase()) {
-            case "P001":
-            case "P1002024":
-                return "John Smith";
-            case "P002":
-            case "P2002024":
-                return "Emma Johnson";
-            case "P003":
-            case "P3002024":
-                return "Robert Brown";
-            case "P004":
-            case "P4002024":
-                return "Sarah Miller";
+    private void displayDoctors(String filterType, String specialization) {
+        List<Staff> doctors;
+        
+        switch (filterType) {
+            case "All Doctors":
+                doctors = doctorDatabase.getAllDoctors();
+                break;
+            case "Available Only":
+                doctors = doctorDatabase.getAvailableDoctors();
+                break;
+            case "By Specialization":
+                if ("All Specializations".equals(specialization)) {
+                    doctors = doctorDatabase.getAllDoctors();
+                } else {
+                    doctors = doctorDatabase.searchBySpecialization(specialization);
+                }
+                break;
             default:
-                return "Patient not found";
-        }
-    }
-    
-    private boolean assignDoctor(Label validationLabel) {
-        if (!validateForm()) {
-            validationLabel.setText("Please fill in all required fields (*)");
-            return false;
+                doctors = doctorDatabase.getAllDoctors();
         }
         
-        try {
-            // Get form values
-            String patientId = patientIdField.getText();
-            String patientName = patientNameField.getText();
-            String doctor = doctorComboBox.getValue();
-            String assignmentType = assignmentTypeComboBox.getValue();
-            String department = departmentComboBox.getValue();
-            String startDate = startDatePicker.getValue().toString();
-            String medicalHistory = medicalHistoryArea.getText();
-            String notes = notesArea.getText();
+        StringBuilder displayText = new StringBuilder();
+        
+        if (doctors.isEmpty()) {
+            displayText.append("No doctors found matching the criteria.");
+        } else {
+            displayText.append("╔════════════════════════════════════════════════════════════════════════════════╗\n");
+            displayText.append("║                             DOCTOR LIST - ").append(String.format("%-20s", filterType)).append(" ║\n");
+            displayText.append("╚════════════════════════════════════════════════════════════════════════════════╝\n\n");
             
-            // Display assignment information
-            System.out.println("\n=== DOCTOR ASSIGNED SUCCESSFULLY ===");
-            System.out.println("Assignment Date: " + LocalDate.now());
-            System.out.println("\n--- PATIENT INFORMATION ---");
-            System.out.println("Patient ID: " + patientId);
-            System.out.println("Patient Name: " + patientName);
-            System.out.println("\n--- DOCTOR INFORMATION ---");
-            System.out.println("Assigned Doctor: " + doctor);
-            System.out.println("Assignment Type: " + assignmentType);
-            System.out.println("Department: " + department);
-            System.out.println("Start Date: " + startDate);
+            displayText.append("┌────┬────────────┬──────────────────────────┬─────────────────┬─────┬──────────────┬────────────────────┐\n");
+            displayText.append("│ No │    ID      │          Name            │ Specialization  │ Exp │    Status    │   Contact          │\n");
+            displayText.append("├────┼────────────┼──────────────────────────┼─────────────────┼─────┼──────────────┼────────────────────┤\n");
             
-            if (!medicalHistory.isEmpty()) {
-                System.out.println("\n--- MEDICAL HISTORY ---");
-                System.out.println(medicalHistory);
+            for (int i = 0; i < doctors.size(); i++) {
+                Staff doctor = doctors.get(i);
+                
+                // Status color indicator
+                String statusIcon = "●";
+                String statusColor = getStatusColor(doctor.getStatus());
+                
+                displayText.append(String.format("│ %2d │ %-10s │ %-24s │ %-15s │ %3d │ %-12s │ %-18s │\n",
+                    i + 1,
+                    doctor.getStaffId(),
+                    doctor.getName().length() > 24 ? doctor.getName().substring(0, 21) + "..." : doctor.getName(),
+                    doctor.getSpecialization(),
+                    doctor.getExperience(),
+                    statusIcon + " " + doctor.getStatus(),
+                    doctor.getPhone()
+                ));
             }
             
-            if (!notes.isEmpty()) {
-                System.out.println("\n--- NOTES ---");
-                System.out.println(notes);
+            displayText.append("└────┴────────────┴──────────────────────────┴─────────────────┴─────┴──────────────┴────────────────────┘\n\n");
+            
+            // Add doctor details
+            displayText.append("\nDOCTOR DETAILS:\n");
+            displayText.append("─".repeat(80)).append("\n");
+            
+            for (int i = 0; i < doctors.size(); i++) {
+                Staff doctor = doctors.get(i);
+                displayText.append("\n").append(i + 1).append(". ").append(doctor.getName()).append("\n");
+                displayText.append("   ID: ").append(doctor.getStaffId()).append("\n");
+                displayText.append("   Specialization: ").append(doctor.getSpecialization()).append("\n");
+                displayText.append("   Experience: ").append(doctor.getExperience()).append(" years\n");
+                displayText.append("   Qualification: ").append(doctor.getQualification()).append("\n");
+                displayText.append("   Status: ").append(doctor.getStatus()).append("\n");
+                displayText.append("   Phone: ").append(doctor.getPhone()).append("\n");
+                displayText.append("   Email: ").append(doctor.getEmail()).append("\n");
+                displayText.append("   Address: ").append(doctor.getAddress()).append("\n");
+                displayText.append("─".repeat(80)).append("\n");
             }
-            
-            System.out.println("\nStatus: ASSIGNED ✓");
-            System.out.println("Medical Record: UPDATED ✓");
-            System.out.println("=== END ===");
-            
-            // Clear validation message
-            validationLabel.setText("");
-            clearForm();
-            
-            return true;
-            
-        } catch (Exception e) {
-            validationLabel.setText("An error occurred: " + e.getMessage());
-            return false;
+        }
+        
+        doctorsArea.setText(displayText.toString());
+    }
+    
+    private String getStatusColor(String status) {
+        switch (status) {
+            case "Active":
+            case "Available":
+            case "Available for Consultation":
+                return "#27ae60"; // Green
+            case "On Duty":
+                return "#3498db"; // Blue
+            case "On Leave":
+                return "#e74c3c"; // Red
+            case "In Surgery":
+                return "#f39c12"; // Orange
+            default:
+                return "#95a5a6"; // Gray
         }
     }
     
-    private boolean validateForm() {
-        return !patientIdField.getText().isEmpty() &&
-               doctorComboBox.getValue() != null &&
-               assignmentTypeComboBox.getValue() != null &&
-               departmentComboBox.getValue() != null &&
-               startDatePicker.getValue() != null;
+    private void displayAllDoctors() {
+        displayDoctors("All Doctors", "All Specializations");
     }
     
-    private void clearForm() {
-        patientIdField.clear();
-        patientNameField.clear();
-        doctorComboBox.setValue(null);
-        assignmentTypeComboBox.setValue(null);
-        departmentComboBox.setValue(null);
-        startDatePicker.setValue(LocalDate.now());
-        medicalHistoryArea.clear();
-        notesArea.clear();
+    private void displayAvailableDoctors() {
+        displayDoctors("Available Only", "All Specializations");
     }
     
-    private void showSuccessAlert() {
+    private void showStatusUpdateDialog() {
+        // Create dialog for updating doctor status
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Update Doctor Status");
+        dialog.setHeaderText("Change doctor availability status");
+        
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+        
+        ComboBox<String> doctorComboBox = new ComboBox<>();
+        List<Staff> allDoctors = doctorDatabase.getAllDoctors();
+        for (Staff doctor : allDoctors) {
+            doctorComboBox.getItems().add(doctor.getStaffId() + " - " + doctor.getName());
+        }
+        doctorComboBox.setPromptText("Select doctor");
+        doctorComboBox.setPrefWidth(250);
+        
+        ComboBox<String> statusComboBox = new ComboBox<>();
+        statusComboBox.getItems().addAll(
+            "Active",
+            "Available",
+            "Available for Consultation",
+            "On Duty",
+            "On Leave",
+            "Not Available",
+            "In Surgery"
+        );
+        statusComboBox.setValue("Active");
+        
+        grid.add(new Label("Doctor:"), 0, 0);
+        grid.add(doctorComboBox, 1, 0);
+        grid.add(new Label("New Status:"), 0, 1);
+        grid.add(statusComboBox, 1, 1);
+        
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String selectedDoctor = doctorComboBox.getValue();
+                String newStatus = statusComboBox.getValue();
+                
+                if (selectedDoctor != null && !selectedDoctor.isEmpty()) {
+                    // Extract doctor ID
+                    String doctorId = selectedDoctor.split(" - ")[0];
+                    
+                    if (doctorDatabase.updateDoctorStatus(doctorId, newStatus)) {
+                        showAlert("Status Updated", "Doctor status has been updated successfully.");
+                        displayAvailableDoctors(); // Refresh display
+                    } else {
+                        showAlert("Error", "Failed to update doctor status.");
+                    }
+                }
+            }
+        });
+    }
+    
+    private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Doctor Assigned");
-        alert.setHeaderText("Doctor Assigned Successfully");
-        alert.setContentText("The doctor has been assigned to the patient.\nMedical records have been updated.");
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
     

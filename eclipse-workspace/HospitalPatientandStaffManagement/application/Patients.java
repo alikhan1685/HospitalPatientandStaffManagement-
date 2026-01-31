@@ -12,6 +12,7 @@ public class Patients {
     private int age;
     private String gender;
     private String address;
+    private String bloodGroup;
     private String phone;
     
     // Constructor matching your parameters
@@ -37,18 +38,24 @@ public class Patients {
     
     // Alternative constructor with more fields
     public Patients(String id, String name, int age, String gender, String address, 
-                   String phone, String medicalHistory, String doctorName) {
-        this(id, name, age, false, medicalHistory, doctorName);
-        this.gender = gender;
-        this.address = address;
-        this.phone = phone;
+                   String phone, String bloodGroup,String assignedDoctorName) {
+       // this(id, name, age, false, medicalHistory, doctorName);
+        this.id = id ;
+        this.name = name;
+        this.age=age;
+        this.gender=gender;
+        this.address=address;
+        this.phone=phone;
+        this.bloodGroup=bloodGroup;
+        this.assignedDoctorName=assignedDoctorName;
+        this.medicalHistory=medicalHistory;    
     }
     
     // Constructor that accepts Person object
     public Patients(Person person, String medicalHistory, String doctorName) {
         this(person.getId(), person.getName(), person.getAge(), 
              person.getGender(), person.getAddress(), person.getPhone(), 
-             medicalHistory, doctorName);
+             person.getmedicalHistory(), doctorName);
     }
     
     // Getters and Setters
@@ -133,6 +140,9 @@ public class Patients {
     public String getRole() {
         return role;
     }
+	public String getBloodGroup() {
+		return bloodGroup;
+	}
     
     // Display Information
     public void displayInfo() {
@@ -201,4 +211,6 @@ public class Patients {
                this.name != null && !this.name.isEmpty() &&
                this.age > 0 && this.age < 150;
     }
+
 }
+

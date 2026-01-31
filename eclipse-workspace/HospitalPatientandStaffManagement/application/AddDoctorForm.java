@@ -6,35 +6,24 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import java.util.Arrays;
-import java.util.List;
 
-public class AddDoctorForm {
-    
+public class AddDoctorForm  extends Doctors{
     private VBox formContainer;
-    private TextField idField;
     private TextField nameField;
     private TextField ageField;
     private ComboBox<String> genderComboBox;
     private ComboBox<String> specializationComboBox;
-    private ComboBox<String> qualificationComboBox;
-    private ComboBox<String> departmentComboBox;
-    private ComboBox<String> statusComboBox;
     private TextField experienceField;
     private TextField phoneField;
     private TextField emailField;
     private TextField licenseField;
-    private TextField consultationHoursField;
-    private TextField consultationFeeField;
-    private TextArea expertiseArea;
-    private TextArea notesArea;
+    private ComboBox<String> statusComboBox;
     
     public AddDoctorForm() {
         initializeForm();
     }
     
     private void initializeForm() {
-        // Create form container
         formContainer = new VBox();
         formContainer.setSpacing(20);
         formContainer.setPadding(new Insets(20));
@@ -53,15 +42,12 @@ public class AddDoctorForm {
         form.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8; -fx-border-width: 1;");
         
         // Initialize form fields
-        idField = createTextField(200, "e.g., DOC-001");
-        nameField = createTextField(300, "Enter full name (Dr. First Last)");
-        ageField = createTextField(80, "Age");
-        experienceField = createTextField(100, "Years");
+        nameField = createTextField(300, "Enter full name");
+        ageField = createTextField(100, "Age");
+        experienceField = createTextField(100, "Years of experience");
         phoneField = createTextField(200, "Phone number");
         emailField = createTextField(250, "Email address");
         licenseField = createTextField(200, "Medical license number");
-        consultationHoursField = createTextField(200, "e.g., 9 AM - 5 PM");
-        consultationFeeField = createTextField(150, "Fee amount");
         
         // Gender ComboBox
         genderComboBox = new ComboBox<>();
@@ -72,178 +58,68 @@ public class AddDoctorForm {
         // Specialization ComboBox
         specializationComboBox = new ComboBox<>();
         specializationComboBox.getItems().addAll(
-            "Cardiology",
-            "Neurology",
-            "Orthopedics",
-            "Pediatrics",
-            "General Medicine",
-            "General Surgery",
-            "Dermatology",
-            "Ophthalmology",
-            "ENT (Otolaryngology)",
-            "Gynecology",
-            "Psychiatry",
-            "Radiology",
-            "Anesthesiology",
-            "Oncology",
-            "Urology",
-            "Nephrology",
-            "Endocrinology",
-            "Gastroenterology",
-            "Hematology",
-            "Pulmonology",
-            "Rheumatology",
-            "Plastic Surgery",
-            "Neuro Surgery",
-            "Cardiac Surgery",
-            "Pediatric Surgery"
+            "Cardiology", "Neurology", "Pediatrics", "General Medicine",
+            "General Surgery", "Dermatology", "Gynecology", "Psychiatry",
+            "Orthopedics", "Radiology", "Anesthesiology", "Emergency Medicine"
         );
         specializationComboBox.setPromptText("Select specialization");
         specializationComboBox.setPrefWidth(250);
         
-        // Qualification ComboBox
-        qualificationComboBox = new ComboBox<>();
-        qualificationComboBox.getItems().addAll(
-            "MBBS (Bachelor of Medicine, Bachelor of Surgery)",
-            "MD (Doctor of Medicine)",
-            "MS (Master of Surgery)",
-            "DM (Doctorate of Medicine)",
-            "MCh (Master of Chirurgiae)",
-            "DNB (Diplomate of National Board)",
-            "PhD (Doctor of Philosophy)",
-            "FRCS (Fellow of Royal College of Surgeons)",
-            "MRCP (Member of Royal College of Physicians)",
-            "Board Certified",
-            "Diploma in Medical Specialization"
-        );
-        qualificationComboBox.setPromptText("Select qualification");
-        qualificationComboBox.setPrefWidth(300);
-        
-        // Department ComboBox
-        departmentComboBox = new ComboBox<>();
-        departmentComboBox.getItems().addAll(
-            "Cardiology Department",
-            "Neurology Department",
-            "Orthopedics Department",
-            "Pediatrics Department",
-            "General Medicine",
-            "Surgery Department",
-            "Dermatology Department",
-            "Ophthalmology Department",
-            "ENT Department",
-            "Gynecology Department",
-            "Psychiatry Department",
-            "Radiology Department",
-            "Anesthesiology Department",
-            "Oncology Department",
-            "Emergency Medicine",
-            "Intensive Care Unit (ICU)",
-            "Outpatient Department (OPD)",
-            "Inpatient Department"
-        );
-        departmentComboBox.setPromptText("Select department");
-        departmentComboBox.setPrefWidth(250);
-        
         // Status ComboBox
         statusComboBox = new ComboBox<>();
         statusComboBox.getItems().addAll(
-            "Active - Available",
-            "Active - On Duty",
-            "Active - Off Duty",
-            "On Leave",
-            "On Vacation",
+            "Active",
+            "Available",
             "Available for Consultation",
+            "On Duty",
+            "On Leave",
             "Not Available",
-            "In Surgery",
-            "In Emergency",
-            "Teaching/Research",
-            "Sabbatical"
+            "In Surgery"
         );
-        statusComboBox.setValue("Active - Available");
+        statusComboBox.setValue("Active");
         statusComboBox.setPrefWidth(200);
-        
-        // Expertise TextArea
-        expertiseArea = new TextArea();
-        expertiseArea.setPrefRowCount(3);
-        expertiseArea.setPrefWidth(300);
-        expertiseArea.setPromptText("Special expertise, procedures, certifications...");
-        expertiseArea.setWrapText(true);
-        
-        // Notes TextArea
-        notesArea = new TextArea();
-        notesArea.setPrefRowCount(3);
-        notesArea.setPrefWidth(300);
-        notesArea.setPromptText("Additional notes (optional)...");
-        notesArea.setWrapText(true);
         
         // Add labels and fields to grid
         int row = 0;
         
-        // Row 0: ID and Name
-        form.add(createLabel("Doctor ID:*"), 0, row);
-        form.add(idField, 1, row);
-        form.add(createLabel("Full Name:*"), 2, row);
-        form.add(nameField, 3, row);
+        form.add(createLabel("Full Name:*"), 0, row);
+        form.add(nameField, 1, row);
         row++;
         
-        // Row 1: Age and Gender
         form.add(createLabel("Age:*"), 0, row);
         form.add(ageField, 1, row);
         form.add(createLabel("Gender:*"), 2, row);
         form.add(genderComboBox, 3, row);
         row++;
         
-        // Row 2: Specialization and Qualification
         form.add(createLabel("Specialization:*"), 0, row);
         form.add(specializationComboBox, 1, row);
-        form.add(createLabel("Qualification:*"), 2, row);
-        form.add(qualificationComboBox, 3, row);
-        row++;
-        
-        // Row 3: Department and Experience
-        form.add(createLabel("Department:*"), 0, row);
-        form.add(departmentComboBox, 1, row);
         form.add(createLabel("Experience (Years):*"), 2, row);
         form.add(experienceField, 3, row);
         row++;
         
-        // Row 4: Contact Information
         form.add(createLabel("Phone:*"), 0, row);
         form.add(phoneField, 1, row);
         form.add(createLabel("Email:*"), 2, row);
         form.add(emailField, 3, row);
         row++;
         
-        // Row 5: Professional Details
         form.add(createLabel("License Number:*"), 0, row);
         form.add(licenseField, 1, row);
         form.add(createLabel("Status:*"), 2, row);
         form.add(statusComboBox, 3, row);
         row++;
         
-        // Row 6: Consultation Details
-        form.add(createLabel("Consultation Hours:"), 0, row);
-        form.add(consultationHoursField, 1, row);
-        form.add(createLabel("Consultation Fee:"), 2, row);
-        form.add(consultationFeeField, 3, row);
-        row++;
-        
-        // Row 7: Address field (takes 2 columns)
         form.add(createLabel("Address:"), 0, row);
-        TextField addressField = new TextField();
-        addressField.setPromptText("Clinic/Hospital address");
-        addressField.setPrefWidth(300);
-        form.add(addressField, 1, row, 3, 1);
+        TextField addressField = createTextField(250, "Clinic/Hospital address");
+        form.add(addressField, 1, row);
         row++;
         
-        // Row 8: Expertise
-        form.add(createLabel("Special Expertise:"), 0, row);
-        form.add(expertiseArea, 1, row, 3, 1);
-        row++;
-        
-        // Row 9: Notes
-        form.add(createLabel("Additional Notes:"), 0, row);
-        form.add(notesArea, 1, row, 3, 1);
+        // Qualification field
+        form.add(createLabel("Qualification:"), 0, row);
+        TextField qualificationField = createTextField(250, "e.g., MBBS, MD, PhD");
+        qualificationField.setText("MBBS");
+        form.add(qualificationField, 1, row);
         row++;
         
         // Form validation message
@@ -255,11 +131,11 @@ public class AddDoctorForm {
         HBox buttonContainer = new HBox(15);
         buttonContainer.setPadding(new Insets(20, 0, 0, 0));
         
-        // Save button
-        Button saveButton = new Button("Save Doctor");
-        saveButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
-        saveButton.setOnAction(e -> {
-            if (saveDoctor(addressField, validationLabel)) {
+        // Add Doctor button
+        Button addButton = new Button("Add Doctor");
+        addButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
+        addButton.setOnAction(e -> {
+            if (saveDoctor(addressField, qualificationField, validationLabel)) {
                 showSuccessAlert();
             }
         });
@@ -268,13 +144,11 @@ public class AddDoctorForm {
         Button clearButton = new Button("Clear Form");
         clearButton.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         clearButton.setOnAction(e -> {
-            clearForm(addressField);
+            clearForm(addressField, qualificationField);
             validationLabel.setText("");
         });
         
-        buttonContainer.getChildren().addAll(saveButton, clearButton);
-        
-        // Add components to container
+        buttonContainer.getChildren().addAll(addButton, clearButton);
         formContainer.getChildren().addAll(title, form, buttonContainer);
     }
     
@@ -291,7 +165,7 @@ public class AddDoctorForm {
         return label;
     }
     
-    private boolean saveDoctor(TextField addressField, Label validationLabel) {
+    private boolean saveDoctor(TextField addressField, TextField qualificationField, Label validationLabel) {
         if (!validateForm()) {
             validationLabel.setText("Please fill in all required fields (*)");
             return false;
@@ -299,27 +173,26 @@ public class AddDoctorForm {
         
         try {
             // Get form values
-            String id = idField.getText();
             String name = nameField.getText();
             int age = Integer.parseInt(ageField.getText());
             String gender = genderComboBox.getValue();
             String specialization = specializationComboBox.getValue();
-            String qualification = qualificationComboBox.getValue();
-            String department = departmentComboBox.getValue();
-            String status = statusComboBox.getValue();
-            String experience = experienceField.getText();
-            String license = licenseField.getText();
+            int experience = Integer.parseInt(experienceField.getText());
             String phone = phoneField.getText();
             String email = emailField.getText();
             String address = addressField.getText();
-            String consultationHours = consultationHoursField.getText();
-            String consultationFee = consultationFeeField.getText();
-            String expertise = expertiseArea.getText();
-            String notes = notesArea.getText();
+            String license = licenseField.getText();
+            String status = statusComboBox.getValue();
+            String qualification = qualificationField.getText();
             
             // Validate data
             if (age < 25 || age > 75) {
                 validationLabel.setText("Age must be between 25 and 75");
+                return false;
+            }
+            
+            if (experience < 0 || experience > 50) {
+                validationLabel.setText("Experience must be between 0 and 50 years");
                 return false;
             }
             
@@ -333,46 +206,48 @@ public class AddDoctorForm {
                 return false;
             }
             
-            // Create Person object
-            Person person = new Person(name, age, gender, address, phone, email, phone); // Using phone as emergency contact
+            // Create Staff object for doctor
+            Staff doctor = new Staff();
             
-            // Display saved information
-            System.out.println("\n=== DOCTOR SAVED SUCCESSFULLY ===");
-            System.out.println("Doctor ID: " + id);
-            System.out.println("Person ID: " + person.getId());
-            System.out.println("Name: " + person.getName());
-            System.out.println("Age: " + person.getAge());
-            System.out.println("Gender: " + person.getGender());
+            // Generate doctor ID
+            String doctorId = "DOC-" + (name.hashCode() % 10000);
+            
+            // Set doctor properties
+            doctor.setStaffId(doctorId);
+            doctor.setName(name);
+            doctor.setAge(age);
+            doctor.setGender(gender);
+            doctor.setAddress(address);
+            doctor.setPhone(phone);
+            doctor.setEmail(email);
+            doctor.setEmergencyContact(phone);
+            doctor.setSpecialization(specialization);
+            doctor.setExperience(experience);
+            doctor.setLicenseNumber(license);
+            doctor.setQualification(qualification);
+            doctor.setDepartment(specialization + " Department");
+            doctor.setStatus(status);
+            
+            // Save to database
+            DoctorDatabase.getInstance().addDoctor(doctor);
+            
+            // Display success message
+            System.out.println("\n" + "=".repeat(50));
+            System.out.println("DOCTOR ADDED TO DATABASE");
+            System.out.println("=".repeat(50));
+            System.out.println("Doctor ID: " + doctorId);
+            System.out.println("Name: " + name);
             System.out.println("Specialization: " + specialization);
-            System.out.println("Qualification: " + qualification);
-            System.out.println("Department: " + department);
             System.out.println("Status: " + status);
-            System.out.println("Experience: " + experience + " years");
-            System.out.println("Medical License: " + license);
-            System.out.println("Phone: " + person.getPhone());
-            System.out.println("Email: " + person.getEmail());
-            System.out.println("Address: " + person.getAddress());
-            System.out.println("Emergency Contact: " + person.getEmergencyContact());
-            System.out.println("Consultation Hours: " + consultationHours);
-            System.out.println("Consultation Fee: " + consultationFee);
+            System.out.println("Total doctors in database: " + DoctorDatabase.getInstance().getDoctorCount());
+            System.out.println("=".repeat(50));
             
-            if (!expertise.isEmpty()) {
-                System.out.println("\nSpecial Expertise:");
-                String[] expertises = expertise.split("\n");
-                for (String exp : expertises) {
-                    System.out.println("  • " + exp.trim());
-                }
-            }
+            // Show database status
+            DoctorDatabase.getInstance().printAllDoctors();
             
-            if (!notes.isEmpty()) {
-                System.out.println("\nAdditional Notes: " + notes);
-            }
-            
-            System.out.println("=== END ===");
-            
-            // Clear validation message
+            // Clear form
             validationLabel.setText("");
-            clearForm(addressField);
+            clearForm(addressField, qualificationField);
             
             return true;
             
@@ -386,45 +261,42 @@ public class AddDoctorForm {
     }
     
     private boolean validateForm() {
-        return !idField.getText().isEmpty() &&
-               !nameField.getText().isEmpty() &&
+        return !nameField.getText().isEmpty() &&
                !ageField.getText().isEmpty() &&
                genderComboBox.getValue() != null &&
                specializationComboBox.getValue() != null &&
-               qualificationComboBox.getValue() != null &&
-               departmentComboBox.getValue() != null &&
-               statusComboBox.getValue() != null &&
                !experienceField.getText().isEmpty() &&
-               !licenseField.getText().isEmpty() &&
                !phoneField.getText().isEmpty() &&
-               !emailField.getText().isEmpty();
+               !emailField.getText().isEmpty() &&
+               !licenseField.getText().isEmpty() &&
+               statusComboBox.getValue() != null;
     }
     
-    private void clearForm(TextField addressField) {
-        idField.clear();
+    private void clearForm(TextField addressField, TextField qualificationField) {
         nameField.clear();
         ageField.clear();
         genderComboBox.setValue(null);
         specializationComboBox.setValue(null);
-        qualificationComboBox.setValue(null);
-        departmentComboBox.setValue(null);
-        statusComboBox.setValue("Active - Available");
         experienceField.clear();
-        licenseField.clear();
         phoneField.clear();
         emailField.clear();
+        licenseField.clear();
         addressField.clear();
-        consultationHoursField.clear();
-        consultationFeeField.clear();
-        expertiseArea.clear();
-        notesArea.clear();
+        qualificationField.clear();
+        qualificationField.setText("MBBS");
+        statusComboBox.setValue("Active");
     }
     
     private void showSuccessAlert() {
+        int totalDoctors = DoctorDatabase.getInstance().getDoctorCount();
+        int availableDoctors = DoctorDatabase.getInstance().getAvailableDoctorCount();
+        
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
-        alert.setHeaderText("Doctor Saved Successfully");
-        alert.setContentText("Doctor information has been saved to the system.");
+        alert.setHeaderText("Doctor Added Successfully");
+        alert.setContentText("Doctor has been added to the database.\n\n" +
+                           "Total doctors: " + totalDoctors + "\n" +
+                           "Available doctors: " + availableDoctors);
         alert.showAndWait();
     }
     

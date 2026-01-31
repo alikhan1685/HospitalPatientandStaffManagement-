@@ -215,7 +215,8 @@ public class MainMenu extends Application {
         });
         
         availableDoctor.setOnMouseClicked(e -> {
-            AvailableStaffForm availableDoctors = new AvailableStaffForm("Doctor");
+            // FIXED: Changed from AvailableStaffForm to AvailableDoctorForm
+            AddDoctorForm availableDoctors = new AddDoctorForm();
             showContent(availableDoctors.getForm());
         });
         
@@ -231,7 +232,7 @@ public class MainMenu extends Application {
         });
         
         availableNurse.setOnMouseClicked(e -> {
-            AvailableStaffForm availableNurses = new AvailableStaffForm("Nurse");
+            AvailableNurseForm availableNurses = new AvailableNurseForm();
             showContent(availableNurses.getForm());
         });
         
@@ -251,8 +252,9 @@ public class MainMenu extends Application {
             showContent(assignTechnicianForm.getForm());
         });
         
+        // FIXED: Changed from AvailableNurseForm to AvailableTechnicianForm
         availableTechnician.setOnMouseClicked(e -> {
-            AvailableStaffForm availableTechnicians = new AvailableStaffForm("Technician");
+            AddTechnicianForm availableTechnicians = new AddTechnicianForm();
             showContent(availableTechnicians.getForm());
         });
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
 
-public class Technician extends StaffID {
+public class Technician extends Staff {
     private static final String role = "Technician";
     private String specialization;
     private String qualification;
