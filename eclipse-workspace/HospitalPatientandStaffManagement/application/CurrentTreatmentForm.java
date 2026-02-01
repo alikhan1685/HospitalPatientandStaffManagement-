@@ -10,8 +10,8 @@ import javafx.scene.text.Font;
 public class CurrentTreatmentForm {
 
     private VBox container;
-    private TableView<TreatmentRecord> treatmentTable;
-    private ObservableList<TreatmentRecord> treatmentData;
+    private TableView<Treatments> treatmentTable;
+    private ObservableList<Treatments> treatmentData;
 
     public CurrentTreatmentForm() {
         treatmentData = FXCollections.observableArrayList();
@@ -31,24 +31,26 @@ public class CurrentTreatmentForm {
         // Table setup
         treatmentTable = new TableView<>();
         treatmentTable.setPrefWidth(900);
-        treatmentTable.setItems(treatmentData);
+        treatmentTable.setItems(
+        	    TreatmentDatabase.getInstance().getTreatments()
+        		);
 
-        TableColumn<TreatmentRecord, String> idCol = new TableColumn<>("Treatment ID");
+        TableColumn<Treatments, String> idCol = new TableColumn<>("Treatment ID");
         idCol.setCellValueFactory(cellData -> cellData.getValue().treatmentIdProperty());
 
-        TableColumn<TreatmentRecord, String> patientCol = new TableColumn<>("Patient Name");
+        TableColumn<Treatments, String> patientCol = new TableColumn<>("Patient Name");
         patientCol.setCellValueFactory(cellData -> cellData.getValue().patientNameProperty());
 
-        TableColumn<TreatmentRecord, String> doctorCol = new TableColumn<>("Doctor");
+        TableColumn<Treatments, String> doctorCol = new TableColumn<>("Doctor");
         doctorCol.setCellValueFactory(cellData -> cellData.getValue().doctorProperty());
 
-        TableColumn<TreatmentRecord, String> typeCol = new TableColumn<>("Treatment Type");
+        TableColumn<Treatments, String> typeCol = new TableColumn<>("Treatment Type");
         typeCol.setCellValueFactory(cellData -> cellData.getValue().treatmentTypeProperty());
 
-        TableColumn<TreatmentRecord, String> durationCol = new TableColumn<>("Duration");
+        TableColumn<Treatments, String> durationCol = new TableColumn<>("Duration");
         durationCol.setCellValueFactory(cellData -> cellData.getValue().durationProperty());
 
-        TableColumn<TreatmentRecord, String> statusCol = new TableColumn<>("Status");
+        TableColumn<Treatments, String> statusCol = new TableColumn<>("Status");
         statusCol.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
 
         treatmentTable.getColumns().addAll(idCol, patientCol, doctorCol, typeCol, durationCol, statusCol);
@@ -76,13 +78,13 @@ public class CurrentTreatmentForm {
 
     private void addSampleData() {
         // For testing/demo, you can replace this with real AddTreatment records
-        treatmentData.add(new TreatmentRecord("TREAT-1001", "John Smith", "Dr. Ahmed Khan", "Surgery", "2 weeks", "Active"));
-        treatmentData.add(new TreatmentRecord("TREAT-1002", "Emma Johnson", "Dr. Farooq", "Chemotherapy", "1 month", "Active"));
-        treatmentData.add(new TreatmentRecord("TREAT-1003", "Robert Brown", "Dr. Aleem", "Physical Therapy", "3 weeks", "Completed"));
+        treatmentData.add(new Treatments("TREAT-1001", "John Smith", "Dr. Ahmed Khan", "Surgery", "2 weeks", "Active", null));
+        treatmentData.add(new Treatments("TREAT-1002", "Emma Johnson", "Dr. Farooq", "Chemotherapy", "1 month", "Active", null));
+        treatmentData.add(new Treatments("TREAT-1003", "Robert Brown", "Dr. Aleem", "Physical Therapy", "3 weeks", "Completed", null));
     }
 
     private void markSelectedCompleted() {
-        TreatmentRecord selected = treatmentTable.getSelectionModel().getSelectedItem();
+    	Treatments selected = treatmentTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
             selected.setStatus("Completed");
             treatmentTable.refresh();

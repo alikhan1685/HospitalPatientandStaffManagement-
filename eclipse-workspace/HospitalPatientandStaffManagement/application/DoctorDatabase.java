@@ -7,10 +7,10 @@ public class DoctorDatabase  {
     private static DoctorDatabase instance;
     private List<Staff> doctors;
     
-    private DoctorDatabase() {
-        doctors = new ArrayList<>();
-        initializeSampleDoctors();
-    }
+  //  private DoctorDatabase() {
+   //     doctors = new ArrayList<>();
+  //      initializeSampleDoctors();
+    //}
     
     public static DoctorDatabase getInstance() {
         if (instance == null) {
@@ -110,7 +110,7 @@ public class DoctorDatabase  {
         }
         return false;
     }
-    
+    /*
     private void initializeSampleDoctors() {
         if (doctors.isEmpty()) {
             System.out.println("📝 Initializing sample doctor data...");
@@ -178,7 +178,7 @@ public class DoctorDatabase  {
             
             System.out.println("✅ " + doctors.size() + " sample doctors added.");
         }
-    }
+    } */
     
     public void printAllDoctors() {
         System.out.println("\n" + "=".repeat(80));

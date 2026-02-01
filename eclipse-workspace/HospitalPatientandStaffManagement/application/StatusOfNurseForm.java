@@ -6,14 +6,14 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import java.util.List;
 
-public class AvailableNurseForm {
+public class StatusOfNurseForm {
     private VBox formContainer;
     private TextArea nursesArea;
     private ComboBox<String> filterComboBox;
     private ComboBox<String> departmentComboBox;
     private NurseDatabase nurseDatabase;
     
-    public AvailableNurseForm() {
+    public StatusOfNurseForm() {
         nurseDatabase = NurseDatabase.getInstance();
         initializeForm();
     }

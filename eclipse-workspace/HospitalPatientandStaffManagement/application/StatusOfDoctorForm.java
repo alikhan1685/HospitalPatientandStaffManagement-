@@ -7,7 +7,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
-public class AddDoctorForm  extends Doctors{
+public class StatusOfDoctorForm  extends Doctors{
     private VBox formContainer;
     private TextField nameField;
     private TextField ageField;
@@ -19,7 +19,7 @@ public class AddDoctorForm  extends Doctors{
     private TextField licenseField;
     private ComboBox<String> statusComboBox;
     
-    public AddDoctorForm() {
+    public StatusOfDoctorForm() {
         initializeForm();
     }
     

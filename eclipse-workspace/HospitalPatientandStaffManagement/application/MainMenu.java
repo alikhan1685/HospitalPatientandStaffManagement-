@@ -111,8 +111,8 @@ public class MainMenu extends Application {
         VBox doctorOptions = new VBox(0);
         doctorOptions.setPadding(new Insets(0, 0, 3, 0));
         Label addDoctor = new Label("ADD");
-        Label availableDoctor = new Label("AVAILABLE");
         Label assignDoctor = new Label("ASSIGN");
+        Label availableDoctor = new Label("AVAILABLE");
         for (Label lbl : new Label[]{addDoctor, availableDoctor, assignDoctor}) {
             lbl.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;");
             lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;"));
@@ -142,7 +142,7 @@ public class MainMenu extends Application {
         technicianOptions.setPadding(new Insets(0, 0, 3, 0));
         Label addTechnician = new Label("ADD");
         Label assignTechnician = new Label("ASSIGN");
-        Label availableTechnician = new Label("AVAILABLE");
+        Label availableTechnician = new Label("AVAILABLES");
         for (Label lbl : new Label[]{addTechnician, assignTechnician, availableTechnician}) {
             lbl.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;");
             lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #1abc9c; -fx-font-size: 10px; -fx-padding: 3 5 3 20; -fx-cursor: hand;"));
@@ -210,17 +210,17 @@ public class MainMenu extends Application {
 
         // Doctor menu click events
         addDoctor.setOnMouseClicked(e -> {
-            AddDoctorForm addDoctorForm = new AddDoctorForm();
+            StatusOfDoctorForm addDoctorForm = new StatusOfDoctorForm();
             showContent(addDoctorForm.getForm());
         });
         
         availableDoctor.setOnMouseClicked(e -> {
             // FIXED: Changed from AvailableStaffForm to AvailableDoctorForm
-            AddDoctorForm availableDoctors = new AddDoctorForm();
+            StatusOfDoctorForm availableDoctors = new StatusOfDoctorForm();
             showContent(availableDoctors.getForm());
         });
         
-        assignDoctor.setOnMouseClicked(e -> {
+        availableDoctor.setOnMouseClicked(e -> {
             AssignDoctorForm assignDoctorForm = new AssignDoctorForm();
             showContent(assignDoctorForm.getForm());
         });
@@ -232,7 +232,7 @@ public class MainMenu extends Application {
         });
         
         availableNurse.setOnMouseClicked(e -> {
-            AvailableNurseForm availableNurses = new AvailableNurseForm();
+            StatusOfNurseForm availableNurses = new StatusOfNurseForm();
             showContent(availableNurses.getForm());
         });
         

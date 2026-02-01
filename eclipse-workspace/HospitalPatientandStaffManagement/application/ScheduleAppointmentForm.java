@@ -1,5 +1,4 @@
 package application;
-
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -10,8 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-public class ScheduleAppointmentForm {
-    
+public class ScheduleAppointmentForm { 
     private VBox formContainer;
     private TextField appointmentIdField;
     private TextField patientIdField;
@@ -24,12 +22,10 @@ public class ScheduleAppointmentForm {
     private ComboBox<String> timeSlotComboBox;
     private TextField durationField;
     private TextArea symptomsArea;
-    private TextArea notesArea;
-    
+    private TextArea notesArea; 
     public ScheduleAppointmentForm() {
         initializeForm();
-    }
-    
+    }  
     private void initializeForm() {
         // Create form container
         formContainer = new VBox();
@@ -129,7 +125,6 @@ public class ScheduleAppointmentForm {
         urgencyComboBox = new ComboBox<>();
         urgencyComboBox.getItems().addAll(
             "Routine - Non-urgent",
-            "Semi-urgent - Within 1 week",
             "Urgent - Within 48 hours",
             "Emergency - Immediate attention",
             "Follow-up - As scheduled"

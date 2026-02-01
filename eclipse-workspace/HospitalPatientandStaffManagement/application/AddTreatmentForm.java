@@ -1,14 +1,11 @@
 package application;
-
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import java.time.LocalDate;
 import java.util.List;
-
 public class AddTreatmentForm {
-    
     private VBox formContainer;
     private TextField treatmentIdField;
     private TextField patientIdField;
@@ -139,8 +136,7 @@ public class AddTreatmentForm {
                     showAlert("Patient Not Found", "No patient found with ID: " + patientId);
                 }
             }
-        });
-        
+        });        
         HBox patientIdContainer = new HBox(5);
         patientIdContainer.getChildren().addAll(patientIdField, searchPatientButton);
         
