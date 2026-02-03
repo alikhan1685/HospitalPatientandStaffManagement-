@@ -6,6 +6,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+
 public class AddDoctorForm {
     private VBox formContainer;
     private TextField nameField;
@@ -47,11 +48,11 @@ public class AddDoctorForm {
         experienceField = createTextField(100, "Years of experience");
         phoneField = createTextField(200, "Phone number");
         licenseField = createTextField(200, "Doctor license number");
-        qualificationField = createTextField(250, "e.g., BSN, RN, LPN");
+        qualificationField = createTextField(250, "e.g., MBBS, MD, MS");
         
         // Gender ComboBox
         genderComboBox = new ComboBox<>();
-        genderComboBox.getItems().addAll("Male", "Female");
+        genderComboBox.getItems().addAll("Male", "Female", "Other");
         genderComboBox.setPromptText("Select gender");
         genderComboBox.setPrefWidth(150);
         
@@ -156,11 +157,11 @@ public class AddDoctorForm {
         HBox buttonContainer = new HBox(15);
         buttonContainer.setPadding(new Insets(20, 0, 0, 0));
         
-        // Add Nurse button
+        // Add Doctor button
         Button addButton = new Button("Add Doctor");
         addButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         addButton.setOnAction(e -> {
-            if (saveNurse(addressField, certificationsField, validationLabel)) {
+            if (saveDoctor(addressField, certificationsField, validationLabel)) {
                 showSuccessAlert();
             }
         });
@@ -190,7 +191,7 @@ public class AddDoctorForm {
         return label;
     }
     
-    private boolean saveNurse(TextField addressField, TextField certificationsField, Label validationLabel) {
+    private boolean saveDoctor(TextField addressField, TextField certificationsField, Label validationLabel) {
         if (!validateForm()) {
             validationLabel.setText("Please fill in all required fields (*)");
             return false;
@@ -198,27 +199,27 @@ public class AddDoctorForm {
         
         try {
             // Get form values
-            String name = nameField.getText();
-            int age = Integer.parseInt(ageField.getText());
+            String name = nameField.getText().trim();
+            int age = Integer.parseInt(ageField.getText().trim());
             String gender = genderComboBox.getValue();
             String specialization = specializationComboBox.getValue();
             String department = departmentComboBox.getValue();
             String shift = shiftComboBox.getValue();
-            int experience = Integer.parseInt(experienceField.getText());
-            String phone = phoneField.getText();
-            String license = licenseField.getText();
-            String qualification = qualificationField.getText();
-            String address = addressField.getText();
-            String certifications = certificationsField.getText();
+            int experience = Integer.parseInt(experienceField.getText().trim());
+            String phone = phoneField.getText().trim();
+            String license = licenseField.getText().trim();
+            String qualification = qualificationField.getText().trim();
+            String address = addressField.getText().trim();
+            String certifications = certificationsField.getText().trim();
             
             // Validate data
-            if (age < 21 || age > 65) {
-                validationLabel.setText("Nurse age must be between 21 and 65");
+            if (age < 25 || age > 70) {
+                validationLabel.setText("Doctor age must be between 25 and 70");
                 return false;
             }
             
-            if (experience < 0 || experience > 40) {
-                validationLabel.setText("Experience must be between 0 and 40 years");
+            if (experience < 0 || experience > 50) {
+                validationLabel.setText("Experience must be between 0 and 50 years");
                 return false;
             }
             
@@ -227,42 +228,50 @@ public class AddDoctorForm {
                 return false;
             }
             
-            // Generate nurse ID
-            String nurseId = "DOC-" + (name.hashCode() % 10000);
+            if (license.isEmpty()) {
+                validationLabel.setText("License number is required");
+                return false;
+            }
             
-            // Create Nurse object
-            Nurses nurse = new Nurses(
-                nurseId,
-                name,
-                age,
-                specialization,
-                qualification,
-                experience,
-                license,
-                gender,
-                address,
-                phone,
-                department
-            );
+            // Generate sequential doctor ID starting from DOC-001
+            String doctorId = generateDoctorId();
             
-            // Set additional properties
-            nurse.setShift(shift);
-            nurse.setCertifications(certifications);
-            nurse.setDepartment(department);
-            nurse.setStatus("Available");
+            // Create the full name with Dr. prefix
+            String fullName = name;
+            if (!name.startsWith("Dr.") && !name.startsWith("Dr ")) {
+                fullName = "Dr. " + name;
+            }
             
-            // Save to database
-            NurseDatabase.getInstance().addNurse(nurse);
+            // Create Staff object for doctor using the full constructor
+            Staff doctor = new Staff(doctorId, fullName, age, gender, specialization, 
+                                    experience, license, qualification, department,
+                                    phone, address, "Available");
             
             // Display success message
             System.out.println("\n" + "=".repeat(50));
             System.out.println("DOCTOR ADDED TO DATABASE");
             System.out.println("=".repeat(50));
-         //   nurse.displayInfo();
+            System.out.println("Doctor ID: " + doctorId);
+            System.out.println("Name: " + fullName);
+            System.out.println("Age: " + age);
+            System.out.println("Gender: " + gender);
+            System.out.println("Specialization: " + specialization);
+            System.out.println("Experience: " + experience + " years");
+            System.out.println("Department: " + department);
+            System.out.println("Qualification: " + qualification);
+            System.out.println("License: " + license);
+            System.out.println("Phone: " + phone);
+            System.out.println("Address: " + address);
+            System.out.println("Shift: " + shift);
+            System.out.println("Certifications: " + certifications);
             System.out.println("=".repeat(50));
             
+            // Save to DoctorDatabase
+            DoctorDatabase db = DoctorDatabase.getInstance();
+            db.addDoctor(doctor);
+            
             // Show database status
-            NurseDatabase.getInstance().printAllNurses();
+            db.printAllDoctors();
             
             // Clear form
             validationLabel.setText("");
@@ -275,21 +284,50 @@ public class AddDoctorForm {
             return false;
         } catch (Exception e) {
             validationLabel.setText("An error occurred: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
     
+    // Helper method to generate sequential doctor IDs
+    private String generateDoctorId() {
+        // Get all current doctors
+        java.util.List<Staff> allDoctors = DoctorDatabase.getInstance().getAllDoctors();
+        
+        // Find the highest existing doctor number
+        int maxNumber = 0;
+        for (Staff doctor : allDoctors) {
+            String id = doctor.getStaffId();
+            if (id != null && id.startsWith("DOC-")) {
+                try {
+                    // Extract the number part after "DOC-"
+                    String numberPart = id.substring(4); // Remove "DOC-"
+                    int number = Integer.parseInt(numberPart);
+                    if (number > maxNumber) {
+                        maxNumber = number;
+                    }
+                } catch (NumberFormatException e) {
+                    // Skip if not a valid number format
+                }
+            }
+        }
+        
+        // Generate next sequential ID
+        int nextNumber = maxNumber + 1;
+        return String.format("DOC-%03d", nextNumber); // DOC-001, DOC-002, etc.
+    }
+    
     private boolean validateForm() {
-        return !nameField.getText().isEmpty() &&
-               !ageField.getText().isEmpty() &&
+        return !nameField.getText().trim().isEmpty() &&
+               !ageField.getText().trim().isEmpty() &&
                genderComboBox.getValue() != null &&
                specializationComboBox.getValue() != null &&
                departmentComboBox.getValue() != null &&
                shiftComboBox.getValue() != null &&
-               !experienceField.getText().isEmpty() &&
-               !phoneField.getText().isEmpty() &&
-               !licenseField.getText().isEmpty() &&
-               !qualificationField.getText().isEmpty();
+               !experienceField.getText().trim().isEmpty() &&
+               !phoneField.getText().trim().isEmpty() &&
+               !licenseField.getText().trim().isEmpty() &&
+               !qualificationField.getText().trim().isEmpty();
     }
     
     private void clearForm(TextField addressField, TextField certificationsField) {
@@ -308,15 +346,15 @@ public class AddDoctorForm {
     }
     
     private void showSuccessAlert() {
-        int totalNurses = NurseDatabase.getInstance().getNurseCount();
-        int availableNurses = NurseDatabase.getInstance().getAvailableNurseCount();
+        int totalDoctors = DoctorDatabase.getInstance().getDoctorCount();
+        int availableDoctors = DoctorDatabase.getInstance().getAvailableDoctorCount();
         
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText("Doctor Added Successfully");
-        alert.setContentText("Nurse has been added to the nursing database.\n\n" +
-                           "Total doctors: " + totalNurses + "\n" +
-                           "Available doctors: " + availableNurses);
+        alert.setContentText("Doctor has been added to the doctor database.\n\n" +
+                           "Total Doctors: " + totalDoctors + "\n" +
+                           "Available Doctors: " + availableDoctors);
         alert.showAndWait();
     }
     

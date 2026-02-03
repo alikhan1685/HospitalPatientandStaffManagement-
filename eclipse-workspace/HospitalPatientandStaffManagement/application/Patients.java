@@ -14,10 +14,22 @@ public class Patients {
     private String address;
     private String bloodGroup;
     private String phone;
+    private String email;
+    private String emergencyContact;
+    
+    // Simple constructor for basic patient info (used by AddPatientForm)
+    public Patients(String name, int age, String gender) {
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+        this.admitted = false;
+        this.medicalHistory = new ArrayList<>();
+        this.id = null; // Will be set by PatientDatabase
+    }
     
     // Constructor matching your parameters
     public Patients(String id, String name, int age, boolean admitted, 
-                   String medicalHistory, String doctorName) {  // Removed email and emergencyContact
+                   String medicalHistory, String doctorName) {
         try {
             this.id = id;
             this.name = name;
@@ -25,7 +37,6 @@ public class Patients {
             this.admitted = admitted;
             this.assignedDoctorName = doctorName;
             
-            // Initialize medicalHistory as ArrayList
             this.medicalHistory = new ArrayList<>();
             if (medicalHistory != null && !medicalHistory.trim().isEmpty()) {
                 this.medicalHistory.add(medicalHistory);
@@ -38,24 +49,17 @@ public class Patients {
     
     // Alternative constructor with more fields
     public Patients(String id, String name, int age, String gender, String address, 
-                   String phone, String bloodGroup,String assignedDoctorName) {
-       // this(id, name, age, false, medicalHistory, doctorName);
-        this.id = id ;
+                   String phone, String bloodGroup, String assignedDoctorName) {
+        this.id = id;
         this.name = name;
-        this.age=age;
-        this.gender=gender;
-        this.address=address;
-        this.phone=phone;
-        this.bloodGroup=bloodGroup;
-        this.assignedDoctorName=assignedDoctorName;
-        this.medicalHistory=medicalHistory;    
-    }
-    
-    // Constructor that accepts Person object
-    public Patients(Person person, String medicalHistory, String doctorName) {
-        this(person.getId(), person.getName(), person.getAge(), 
-             person.getGender(), person.getAddress(), person.getPhone(), 
-             person.getmedicalHistory(), doctorName);
+        this.age = age;
+        this.gender = gender;
+        this.address = address;
+        this.phone = phone;
+        this.bloodGroup = bloodGroup;
+        this.assignedDoctorName = assignedDoctorName;
+        this.admitted = false;
+        this.medicalHistory = new ArrayList<>();
     }
     
     // Getters and Setters
@@ -107,6 +111,30 @@ public class Patients {
         this.phone = phone;
     }
     
+    public String getEmail() {
+        return email;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
+    public String getEmergencyContact() {
+        return emergencyContact;
+    }
+    
+    public void setEmergencyContact(String emergencyContact) {
+        this.emergencyContact = emergencyContact;
+    }
+    
+    public String getBloodGroup() {
+        return bloodGroup;
+    }
+    
+    public void setBloodGroup(String bloodGroup) {
+        this.bloodGroup = bloodGroup;
+    }
+    
     public List<String> getMedicalHistory() {
         return medicalHistory;
     }
@@ -116,6 +144,9 @@ public class Patients {
     }
     
     public void addMedicalHistory(String history) {
+        if (this.medicalHistory == null) {
+            this.medicalHistory = new ArrayList<>();
+        }
         if (history != null && !history.trim().isEmpty()) {
             this.medicalHistory.add(history);
         }
@@ -140,9 +171,6 @@ public class Patients {
     public String getRole() {
         return role;
     }
-	public String getBloodGroup() {
-		return bloodGroup;
-	}
     
     // Display Information
     public void displayInfo() {
@@ -154,6 +182,7 @@ public class Patients {
             System.out.println("Gender: " + (this.gender != null ? this.gender : "Not specified"));
             System.out.println("Address: " + (this.address != null ? this.address : "Not specified"));
             System.out.println("Phone: " + (this.phone != null ? this.phone : "Not specified"));
+            System.out.println("Blood Group: " + (this.bloodGroup != null ? this.bloodGroup : "Not specified"));
             System.out.println("Status: " + (this.admitted ? "ADMITTED" : "NOT ADMITTED"));
             System.out.println("Assigned Doctor: " + (this.assignedDoctorName != null ? this.assignedDoctorName : "Not assigned"));
             
@@ -207,10 +236,7 @@ public class Patients {
     
     // Validation method
     public boolean isValidPatient() {
-        return this.id != null && !this.id.isEmpty() &&
-               this.name != null && !this.name.isEmpty() &&
+        return this.name != null && !this.name.isEmpty() &&
                this.age > 0 && this.age < 150;
     }
-
 }
-

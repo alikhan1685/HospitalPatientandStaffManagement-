@@ -22,6 +22,38 @@ public class Staff {
     protected List<String> additionalNotes;
     protected LocalDate dateJoined;
     
+    // Constructor for DoctorDatabase
+    public Staff(String staffId, String name, String specialization, int experience, String status) {
+        this.staffId = staffId;
+        this.name = name;
+        this.specialization = specialization;
+        this.experience = experience;
+        this.status = status;
+        this.additionalNotes = new ArrayList<>();
+        this.dateJoined = LocalDate.now();
+    }
+    
+    // Additional constructor with more details
+    public Staff(String staffId, String name, int age, String gender, String specialization, 
+                 int experience, String licenseNumber, String qualification, String department,
+                 String phone, String address, String status) {
+        this.staffId = staffId;
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+        this.specialization = specialization;
+        this.experience = experience;
+        this.licenseNumber = licenseNumber;
+        this.qualification = qualification;
+        this.department = department;
+        this.phone = phone;
+        this.address = address;
+        this.status = status;
+        this.additionalNotes = new ArrayList<>();
+        this.dateJoined = LocalDate.now();
+    }
+    
+    // Empty constructor
     public Staff() {
         this.additionalNotes = new ArrayList<>();
         this.dateJoined = LocalDate.now();
@@ -83,6 +115,7 @@ public class Staff {
     
     // Common display method
     public void displayBasicInfo() {
+        System.out.println("\n=== Staff Information ===");
         System.out.println("ID: " + this.staffId);
         System.out.println("Name: " + this.name);
         System.out.println("Age: " + this.age);
@@ -94,7 +127,10 @@ public class Staff {
         System.out.println("Email: " + this.email);
         System.out.println("Address: " + this.address);
         System.out.println("Department: " + this.department);
+        System.out.println("Qualification: " + this.qualification);
+        System.out.println("License: " + this.licenseNumber);
         System.out.println("Date Joined: " + this.dateJoined);
+        System.out.println("========================\n");
     }
     
     // Check if staff is available
@@ -110,5 +146,22 @@ public class Staff {
                name != null && !name.isEmpty() &&
                age >= 18 && age <= 70 &&
                phone != null && phone.matches("\\d{10,}");
+    }
+    
+    // Helper method to set all fields from AddDoctorForm
+    public void setAllDetails(String name, int age, String gender, String specialization, 
+                              int experience, String licenseNumber, String qualification, 
+                              String department, String phone, String address, String email) {
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+        this.specialization = specialization;
+        this.experience = experience;
+        this.licenseNumber = licenseNumber;
+        this.qualification = qualification;
+        this.department = department;
+        this.phone = phone;
+        this.address = address;
+        this.email = email;
     }
 }

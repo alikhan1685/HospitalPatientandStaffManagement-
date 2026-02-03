@@ -23,7 +23,7 @@ public class AddPatientForm {
     public AddPatientForm() {
         initializeForm();
     }
-    
+   
     private void initializeForm() {
         // Create form container
         formContainer = new VBox();
@@ -86,7 +86,7 @@ public class AddPatientForm {
         
         form.add(createLabel("Phone:*"), 0, row);
         form.add(phoneField, 1, row++);
-   
+        
         form.add(createLabel("Blood Group:"), 0, row);
         form.add(bloodGroupField, 1, row++);
         
@@ -182,32 +182,26 @@ public class AddPatientForm {
                 return false;
             }
             
-           // if (!emergencyContact.matches("\\d{10,}")) {
-             //   validationLabel.setText("Emergency contact must contain at least 10 digits");
-               // return false;
-          //  }
-            
             if (!email.isEmpty() && !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
                 validationLabel.setText("Please enter a valid email address (or leave empty)");
                 return false;
             }
             
-         
-            Person person = new Person(name, age, gender, address, phone, email, emergencyContact);
+            // Create patient WITHOUT ID - let PatientDatabase generate it
+            Patients patient = new Patients(name, age, gender);
+            patient.setAddress(address);
+            patient.setPhone(phone);
+            patient.setEmail(email);
+            patient.setEmergencyContact(emergencyContact);
+            patient.setAssignedDoctorName(doctor);
+            patient.setBloodGroup(bloodGroup);
             
-            // Create Patient object
-            Patients patient = new Patients(
-                person.getId(),
-                person.getName(),
-                person.getAge(),
-                person.getGender(),
-                person.getAddress(),
-                person.getPhone(),
-                person.getbloodGroup(),
-                person.getmedicalHistory()
-            );
+            // Add medical history
+            if (medicalHistory != null && !medicalHistory.trim().isEmpty()) {
+                patient.addMedicalHistory(medicalHistory);
+            }
             
-            // ADD THE PATIENT TO THE DATABASE
+            // ADD THE PATIENT TO THE DATABASE - Database will assign ID
             PatientDatabase.getInstance().addPatient(patient);
             
             // Display saved information in console
@@ -220,7 +214,9 @@ public class AddPatientForm {
             System.out.println("Address: " + patient.getAddress());
             System.out.println("Assigned Doctor: " + patient.getAssignedDoctorName());
             System.out.println("Blood Group: " + patient.getBloodGroup());
-            System.out.println("Medical History: " + patient.getMedicalHistory());
+            if (patient.getMedicalHistory() != null && !patient.getMedicalHistory().isEmpty()) {
+                System.out.println("Medical History: " + patient.getMedicalHistory());
+            }
             
             // Display database status
             System.out.println("Total patients in database: " + PatientDatabase.getInstance().getAllPatients().size());
@@ -252,6 +248,8 @@ public class AddPatientForm {
         genderComboBox.setValue(null);
         addressField.clear();
         phoneField.clear();
+        emailField.clear();
+        emergencyContactField.clear();
         bloodGroupField.clear();
         assignDoctorComboBox.setValue(null);
         medicalHistoryArea.clear();
@@ -261,7 +259,10 @@ public class AddPatientForm {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText("Patient Saved Successfully");
-        alert.setContentText("Patient information has been saved to the system.");
+        alert.setContentText("Patient information has been saved to the system.\nPatient ID: " + 
+            PatientDatabase.getInstance().getAllPatients().get(
+                PatientDatabase.getInstance().getPatientCount() - 1
+            ).getId());
         alert.showAndWait();
     }
     

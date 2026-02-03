@@ -13,7 +13,7 @@ import javafx.scene.Scene;
 public class MainMenu extends Application {
     private VBox contentArea = new VBox();
     private BorderPane root = new BorderPane();
-    
+  
     @Override
     public void start(Stage stage) {
         // ---------------- HAMBURGER BUTTON ----------------
@@ -80,25 +80,25 @@ public class MainMenu extends Application {
         VBox treatmentOptions = new VBox(0);
         treatmentOptions.setPadding(new Insets(0, 0, 5, 0));
         Label addTreatment = new Label("ADD");
-        Label updateTreatment = new Label("UPDATE");
-        for (Label lbl : new Label[]{addTreatment, updateTreatment}) {
+        Label statusTreatment = new Label("STATUS");
+        for (Label lbl : new Label[]{addTreatment, statusTreatment}) {
             lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;");
             lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #e67e22; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
             lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
         }
-        treatmentOptions.getChildren().addAll(addTreatment, updateTreatment);
+        treatmentOptions.getChildren().addAll(addTreatment, statusTreatment);
 
         // ---------------- APPOINTMENT OPTIONS ----------------
         VBox appointmentOptions = new VBox(0);
         appointmentOptions.setPadding(new Insets(0, 0, 5, 0));
         Label scheduleAppointment = new Label("SCHEDULE");
-        Label cancelAppointment = new Label("CANCEL");
-        for (Label lbl : new Label[]{scheduleAppointment, cancelAppointment}) {
+        Label statusAppointment = new Label("STATUS");
+        for (Label lbl : new Label[]{scheduleAppointment, statusAppointment}) {
             lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;");
             lbl.setOnMouseEntered(e -> lbl.setStyle("-fx-text-fill: #f1c40f; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
             lbl.setOnMouseExited(e -> lbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 4 5 4 20; -fx-cursor: hand;"));
         }
-        appointmentOptions.getChildren().addAll(scheduleAppointment, cancelAppointment);
+        appointmentOptions.getChildren().addAll(scheduleAppointment, statusAppointment);
 
         // ---------------- STAFF OPTIONS ----------------
         VBox staffOptions = new VBox(0);
@@ -192,18 +192,18 @@ public class MainMenu extends Application {
             showContent(addTreatmentForm.getForm());
         });
         
-        updateTreatment.setOnMouseClicked(e -> {
+        statusTreatment.setOnMouseClicked(e -> {
             CurrentTreatmentForm updateTreatmentForm = new CurrentTreatmentForm();
             showContent(updateTreatmentForm.getForm());
         });
 
-        //scheduleAppointment.setOnMouseClicked(e -> {
-         //   ScheduleAppointmentForm scheduleForm = new ScheduleAppointmentForm();
-       //     showContent(scheduleForm.getForm());
-        //});
+        scheduleAppointment.setOnMouseClicked(e -> {
+            ScheduleAppointmentForm scheduleForm = new ScheduleAppointmentForm();
+            showContent(scheduleForm.getForm());
+        });
         
-        cancelAppointment.setOnMouseClicked(e -> {
-            CancelAppointmentForm cancelForm = new CancelAppointmentForm();
+        statusAppointment.setOnMouseClicked(e -> {
+            CurrentAppointmentForm cancelForm = new CurrentAppointmentForm();
             showContent(cancelForm.getForm());
         });
 

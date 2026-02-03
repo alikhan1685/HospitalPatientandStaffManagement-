@@ -1,4 +1,5 @@
 package application;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -6,9 +7,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-public class ScheduleAppointmentForm { 
+import java.util.List;
+
+public class ScheduleAppointmentForm {
     private VBox formContainer;
     private TextField appointmentIdField;
     private TextField patientIdField;
@@ -18,28 +20,24 @@ public class ScheduleAppointmentForm {
     private ComboBox<String> departmentComboBox;
     private ComboBox<String> urgencyComboBox;
     private DatePicker appointmentDatePicker;
-    private ComboBox<String> timeSlotComboBox;
-    private TextField durationField;
+    private TextField contactField;
     private TextArea symptomsArea;
-    private TextArea notesArea; 
+    private TextArea notesArea;
+   
     public ScheduleAppointmentForm() {
         initializeForm();
-    } 
+    }
+   
     private void initializeForm() {
-        // Create form container
         formContainer = new VBox();
         formContainer.setSpacing(20);
         formContainer.setPadding(new Insets(20));
         formContainer.setStyle("-fx-background-color: #f8f9fa;");
-       
+        
         // Title
         Label title = new Label("Schedule Medical Appointment");
         title.setFont(new Font("Arial", 28));
-        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 10 0;");
-        
-        // Subtitle
-        Label subtitle = new Label("Schedule appointments for patients with medical professionals");
-        subtitle.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 14px;");
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
         
         // Create form grid
         GridPane form = new GridPane();
@@ -54,29 +52,18 @@ public class ScheduleAppointmentForm {
         appointmentIdField.setEditable(false);
         appointmentIdField.setStyle("-fx-background-color: #ecf0f1; -fx-font-weight: bold;");
         
-        patientIdField = createTextField(200, "Enter patient ID");
+        patientIdField = createTextField(200, "Enter patient ID (e.g., P001)");
         patientNameField = createTextField(250, "Patient name (auto-filled)");
         patientNameField.setEditable(false);
         patientNameField.setStyle("-fx-background-color: #ecf0f1;");
         
-        durationField = createTextField(100, "e.g., 30 min, 1 hour");
+        contactField = createTextField(150, "Phone number");
         
-        // Doctor ComboBox
+        // Doctor ComboBox - Populate from DoctorDatabase
         doctorComboBox = new ComboBox<>();
-        doctorComboBox.getItems().addAll(
-            "Dr. Smith - Cardiology (Available: Mon-Fri, 9 AM - 5 PM)",
-            "Dr. Johnson - Neurology (Available: Mon-Wed, 10 AM - 4 PM)",
-            "Dr. Williams - Pediatrics (Available: Tue-Thu, 8 AM - 6 PM)",
-            "Dr. Brown - Orthopedics (Available: Mon-Fri, 9 AM - 3 PM)",
-            "Dr. Davis - General Medicine (Available: Daily, 8 AM - 8 PM)",
-            "Dr. Miller - Dermatology (Available: Wed-Fri, 11 AM - 7 PM)",
-            "Dr. Wilson - Surgery (Available: Mon, Wed, Fri, 9 AM - 1 PM)",
-            "Dr. Taylor - Gynecology (Available: Tue, Thu, 10 AM - 6 PM)",
-            "Dr. Anderson - Psychiatry (Available: Mon-Fri, 9 AM - 5 PM)",
-            "Dr. Thomas - Ophthalmology (Available: Wed-Sat, 9 AM - 4 PM)"
-        );
+        populateDoctorComboBox();
         doctorComboBox.setPromptText("Select doctor");
-        doctorComboBox.setPrefWidth(350);
+        doctorComboBox.setPrefWidth(250);
         
         // Appointment Type ComboBox
         appointmentTypeComboBox = new ComboBox<>();
@@ -90,35 +77,17 @@ public class ScheduleAppointmentForm {
             "Vaccination/Immunization",
             "Pre-surgical Consultation",
             "Therapy Session",
-            "Second Opinion",
-            "Telemedicine Consultation",
-            "Physical Examination",
-            "Medication Review",
-            "Specialist Referral"
+            "Second Opinion"
         );
         appointmentTypeComboBox.setPromptText("Select appointment type");
-        appointmentTypeComboBox.setPrefWidth(250);
+        appointmentTypeComboBox.setPrefWidth(200);
         
         // Department ComboBox
         departmentComboBox = new ComboBox<>();
-        departmentComboBox.getItems().addAll(
-            "Cardiology Department",
-            "Neurology Department",
-            "Pediatrics Department",
-            "Orthopedics Department",
-            "General Medicine",
-            "Dermatology Department",
-            "Surgery Department",
-            "Gynecology Department",
-            "Psychiatry Department",
-            "Ophthalmology Department",
-            "ENT Department",
-            "Oncology Department",
-            "Emergency Department",
-            "Outpatient Department (OPD)"
-        );
-        departmentComboBox.setPromptText("Select department");
-        departmentComboBox.setPrefWidth(250);
+        // We'll populate this from doctor's specialization
+        departmentComboBox.setPromptText("Department will auto-fill");
+        departmentComboBox.setPrefWidth(200);
+        departmentComboBox.setEditable(false);
         
         // Urgency ComboBox
         urgencyComboBox = new ComboBox<>();
@@ -129,23 +98,12 @@ public class ScheduleAppointmentForm {
             "Follow-up - As scheduled"
         );
         urgencyComboBox.setValue("Routine - Non-urgent");
-        urgencyComboBox.setPrefWidth(200);
+        urgencyComboBox.setPrefWidth(180);
         
         // Date Picker
         appointmentDatePicker = new DatePicker();
-        appointmentDatePicker.setValue(LocalDate.now().plusDays(1)); // Tomorrow by default
+        appointmentDatePicker.setValue(LocalDate.now().plusDays(1));
         appointmentDatePicker.setPrefWidth(150);
-        
-        // Time Slot ComboBox
-        timeSlotComboBox = new ComboBox<>();
-        updateTimeSlots(); // Initial time slots
-        timeSlotComboBox.setPromptText("Select time slot");
-        timeSlotComboBox.setPrefWidth(150);
-        
-        // Update time slots when date changes
-        appointmentDatePicker.valueProperty().addListener((obs, oldDate, newDate) -> {
-            updateTimeSlots();
-        });
         
         // Symptoms TextArea
         symptomsArea = new TextArea();
@@ -165,10 +123,48 @@ public class ScheduleAppointmentForm {
         patientIdField.setOnKeyReleased(e -> {
             String patientId = patientIdField.getText().trim();
             if (!patientId.isEmpty()) {
-                // Simulate patient name lookup
-                patientNameField.setText(getPatientName(patientId));
+                String patientName = getPatientNameFromDatabase(patientId);
+                patientNameField.setText(patientName);
+                
+                // If patient exists, fill all their information
+                if (!patientName.equals("Patient not found")) {
+                    Patients patient = PatientDatabase.getInstance().getPatient(patientId);
+                    if (patient != null) {
+                        // Fill contact field if available
+                        if (patient.getPhone() != null && !patient.getPhone().isEmpty()) {
+                            contactField.setText(patient.getPhone());
+                        }
+                        
+                        // AUTO-FILL DOCTOR AND DEPARTMENT FROM PATIENT'S ASSIGNED DOCTOR
+                        String assignedDoctorName = patient.getAssignedDoctorName();
+                        if (assignedDoctorName != null && !assignedDoctorName.isEmpty()) {
+                            // Find and select the assigned doctor in combobox
+                            doctorComboBox.setValue(assignedDoctorName);
+                            
+                            // Find the doctor in DoctorDatabase and get their specialization/department
+                            Staff assignedDoctor = findDoctorByName(assignedDoctorName);
+                            if (assignedDoctor != null) {
+                                String department = assignedDoctor.getSpecialization();
+                                departmentComboBox.setValue(department);
+                            }
+                        }
+                    }
+                }
             } else {
                 patientNameField.clear();
+            }
+        });
+        
+        // Add listener to doctor combobox to auto-fill department
+        doctorComboBox.setOnAction(e -> {
+            String selectedDoctor = doctorComboBox.getValue();
+            if (selectedDoctor != null) {
+                // Find the doctor and get their specialization
+                Staff doctor = findDoctorByName(selectedDoctor);
+                if (doctor != null) {
+                    String department = doctor.getSpecialization();
+                    departmentComboBox.setValue(department);
+                }
             }
         });
         
@@ -189,33 +185,32 @@ public class ScheduleAppointmentForm {
         
         // Row 2: Doctor Selection
         form.add(createLabel("Doctor:*"), 0, row);
-        form.add(doctorComboBox, 1, row, 3, 1);
+        form.add(doctorComboBox, 1, row);
+        form.add(createLabel("Department:*"), 2, row);
+        form.add(departmentComboBox, 3, row);
         row++;
         
         // Row 3: Appointment Details
         form.add(createLabel("Appointment Type:*"), 0, row);
         form.add(appointmentTypeComboBox, 1, row);
-        form.add(createLabel("Department:*"), 2, row);
-        form.add(departmentComboBox, 3, row);
+        form.add(createLabel("Date:*"), 2, row);
+        form.add(appointmentDatePicker, 3, row);
         row++;
         
-        // Row 4: Schedule
-        form.add(createLabel("Date:*"), 0, row);
-        form.add(appointmentDatePicker, 1, row);
-        form.add(createLabel("Time Slot:*"), 2, row);
-        form.add(timeSlotComboBox, 3, row);
-        row++;
-        
-        form.add(createLabel("Duration:*"), 0, row);
-        form.add(durationField, 1, row);
+        // Row 4: Contact & Urgency
+        form.add(createLabel("Contact:*"), 0, row);
+        form.add(contactField, 1, row);
         form.add(createLabel("Urgency:*"), 2, row);
         form.add(urgencyComboBox, 3, row);
         row++;
         
-        // Row 5: Room/Clinic
+        // Row 5: Room/Clinic and Time
         form.add(createLabel("Room/Clinic:"), 0, row);
         TextField roomField = createTextField(200, "e.g., Room 101, Clinic A");
         form.add(roomField, 1, row);
+        form.add(createLabel("Time:"), 2, row);
+        TextField timeField = createTextField(100, "e.g., 10:30 AM");
+        form.add(timeField, 3, row);
         row++;
         
         // Row 6: Symptoms
@@ -228,16 +223,6 @@ public class ScheduleAppointmentForm {
         form.add(notesArea, 1, row, 3, 1);
         row++;
         
-        // Row 8: Insurance/Contact Info
-        form.add(createLabel("Insurance Info:"), 0, row);
-        TextField insuranceField = createTextField(200, "Insurance provider & number");
-        form.add(insuranceField, 1, row);
-        
-        form.add(createLabel("Contact Person:"), 2, row);
-        TextField contactPersonField = createTextField(200, "Emergency contact person");
-        form.add(contactPersonField, 3, row);
-        row++;
-        
         // Form validation message
         Label validationLabel = new Label();
         validationLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 12px;");
@@ -248,10 +233,10 @@ public class ScheduleAppointmentForm {
         buttonContainer.setPadding(new Insets(20, 0, 0, 0));
         
         // Schedule button
-        Button scheduleButton = new Button("📅 Schedule Appointment");
+        Button scheduleButton = new Button("Schedule Appointment");
         scheduleButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         scheduleButton.setOnAction(e -> {
-            if (scheduleAppointment(roomField, insuranceField, contactPersonField, validationLabel)) {
+            if (saveAppointment(roomField, timeField, validationLabel)) {
                 showSuccessAlert();
             }
         });
@@ -260,19 +245,45 @@ public class ScheduleAppointmentForm {
         Button clearButton = new Button("Clear Form");
         clearButton.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         clearButton.setOnAction(e -> {
-            clearForm(roomField, insuranceField, contactPersonField);
+            clearForm(roomField, timeField);
             validationLabel.setText("");
         });
         
-        // Check Availability button
-        Button availabilityButton = new Button("Check Doctor Availability");
-        availabilityButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
-        availabilityButton.setOnAction(e -> checkDoctorAvailability());
+        // Add Find Patient button
+        Button findPatientButton = new Button("Find Patient");
+        findPatientButton.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
+        findPatientButton.setOnAction(e -> {
+            String patientId = patientIdField.getText().trim();
+            if (!patientId.isEmpty()) {
+                String patientName = getPatientNameFromDatabase(patientId);
+                if (patientName.equals("Patient not found")) {
+                    showAlert("Patient Not Found", "No patient found with ID: " + patientId);
+                } else {
+                    patientNameField.setText(patientName);
+                    
+                    // Auto-fill doctor and department if patient has assigned doctor
+                    Patients patient = PatientDatabase.getInstance().getPatient(patientId);
+                    if (patient != null) {
+                        String assignedDoctorName = patient.getAssignedDoctorName();
+                        if (assignedDoctorName != null && !assignedDoctorName.isEmpty()) {
+                            doctorComboBox.setValue(assignedDoctorName);
+                            
+                            Staff assignedDoctor = findDoctorByName(assignedDoctorName);
+                            if (assignedDoctor != null) {
+                                departmentComboBox.setValue(assignedDoctor.getSpecialization());
+                            }
+                        }
+                    }
+                    
+                    showAlert("Patient Found", "Patient: " + patientName + "\nID: " + patientId);
+                }
+            } else {
+                showAlert("Missing ID", "Please enter a Patient ID first");
+            }
+        });
         
-        buttonContainer.getChildren().addAll(scheduleButton, clearButton, availabilityButton);
-        
-        // Add components to container
-        formContainer.getChildren().addAll(title, subtitle, form, buttonContainer);
+        buttonContainer.getChildren().addAll(scheduleButton, findPatientButton, clearButton);
+        formContainer.getChildren().addAll(title, form, buttonContainer);
     }
     
     private TextField createTextField(double width, String prompt) {
@@ -288,45 +299,37 @@ public class ScheduleAppointmentForm {
         return label;
     }
     
-    private void updateTimeSlots() {
-        timeSlotComboBox.getItems().clear();
-        LocalDate selectedDate = appointmentDatePicker.getValue();
-        
-        if (selectedDate != null) {
-            // Generate time slots from 8 AM to 6 PM
-            for (int hour = 8; hour <= 18; hour++) {
-                for (int minute = 0; minute < 60; minute += 30) { // 30-minute intervals
-                    String time = String.format("%02d:%02d", hour, minute);
-                    timeSlotComboBox.getItems().add(time);
-                }
+    // Method to get patient name from database
+    private String getPatientNameFromDatabase(String patientId) {
+        PatientDatabase database = PatientDatabase.getInstance();
+        String patientName = database.getPatientName(patientId);
+        return patientName;
+    }
+    
+    // Method to populate doctor combobox from DoctorDatabase
+    private void populateDoctorComboBox() {
+        List<Staff> doctors = DoctorDatabase.getInstance().getAllDoctors();
+        for (Staff doctor : doctors) {
+            String doctorInfo = doctor.getName() + " - " + doctor.getSpecialization();
+            doctorComboBox.getItems().add(doctorInfo);
+        }
+    }
+    
+    // Method to find doctor by name from DoctorDatabase
+    private Staff findDoctorByName(String doctorInfo) {
+        List<Staff> doctors = DoctorDatabase.getInstance().getAllDoctors();
+        for (Staff doctor : doctors) {
+            String doctorDisplayName = doctor.getName() + " - " + doctor.getSpecialization();
+            if (doctorDisplayName.equals(doctorInfo) || doctor.getName().equals(doctorInfo)) {
+                return doctor;
             }
         }
+        return null;
     }
     
-    private String getPatientName(String patientId) {
-        // Simulate patient lookup - in real app, this would query database
-        switch (patientId.toUpperCase()) {
-            case "P001":
-            case "P1002024":
-                return "John Smith";
-            case "P002":
-            case "P2002024":
-                return "Emma Johnson";
-            case "P003":
-            case "P3002024":
-                return "Robert Brown";
-            case "P004":
-            case "P4002024":
-                return "Sarah Miller";
-            default:
-                return "Patient not found";
-        }
-    }
-    
-    private boolean scheduleAppointment(TextField roomField, 
-                                        TextField insuranceField, 
-                                        TextField contactPersonField, 
-                                        Label validationLabel) {
+    private boolean saveAppointment(TextField roomField, 
+                                    TextField timeField, 
+                                    Label validationLabel) {
         if (!validateForm()) {
             validationLabel.setText("Please fill in all required fields (*)");
             return false;
@@ -342,31 +345,40 @@ public class ScheduleAppointmentForm {
             String department = departmentComboBox.getValue();
             String urgency = urgencyComboBox.getValue();
             LocalDate appointmentDate = appointmentDatePicker.getValue();
-            String timeSlot = timeSlotComboBox.getValue();
-            String duration = durationField.getText();
+            String time = timeField.getText();
+            String contact = contactField.getText();
             String room = roomField.getText();
             String symptoms = symptomsArea.getText();
             String notes = notesArea.getText();
-            String insurance = insuranceField.getText();
-            String contactPerson = contactPersonField.getText();
+            
+            // Validate patient exists
+            if (patientName.equals("Patient not found")) {
+                validationLabel.setText("Patient ID not found. Please enter a valid patient ID.");
+                return false;
+            }
+            
+            // Validate contact number
+            if (!contact.matches("\\d{10,}")) {
+                validationLabel.setText("Contact number must contain at least 10 digits");
+                return false;
+            }
             
             // Display appointment information
             System.out.println("\n=== APPOINTMENT SCHEDULED SUCCESSFULLY ===");
             System.out.println("Appointment ID: " + appointmentId);
-            System.out.println("Scheduled Date: " + LocalDate.now());
-            System.out.println("Scheduled Time: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+            System.out.println("Date: " + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
             System.out.println("\n--- PATIENT INFORMATION ---");
             System.out.println("Patient ID: " + patientId);
             System.out.println("Patient Name: " + patientName);
+            System.out.println("Contact: " + contact);
             System.out.println("\n--- DOCTOR INFORMATION ---");
-            System.out.println("Assigned Doctor: " + doctor);
+            System.out.println("Doctor: " + doctor);
             System.out.println("Department: " + department);
             System.out.println("\n--- APPOINTMENT DETAILS ---");
             System.out.println("Appointment Type: " + appointmentType);
             System.out.println("Date: " + appointmentDate);
-            System.out.println("Time Slot: " + timeSlot);
-            System.out.println("Duration: " + duration);
-            System.out.println("Urgency Level: " + urgency);
+            System.out.println("Time: " + time);
+            System.out.println("Urgency: " + urgency);
             System.out.println("Room/Clinic: " + room);
             System.out.println("\n--- MEDICAL INFORMATION ---");
             System.out.println("Symptoms/Reason: " + symptoms);
@@ -375,26 +387,38 @@ public class ScheduleAppointmentForm {
                 System.out.println("Additional Notes: " + notes);
             }
             
-            if (!insurance.isEmpty()) {
-                System.out.println("Insurance Information: " + insurance);
-            }
-            
-            if (!contactPerson.isEmpty()) {
-                System.out.println("Emergency Contact: " + contactPerson);
-            }
-            
             System.out.println("\n--- APPOINTMENT STATUS ---");
             System.out.println("Status: SCHEDULED ✓");
             System.out.println("Confirmation: EMAIL_SENT ✓");
-            System.out.println("Reminder: SET_FOR_24_HOURS_BEFORE ✓");
             System.out.println("=== END ===");
+            
+            // Create and save appointment to database
+            Appointment appointment = new Appointment(
+                appointmentId,      // appointmentId
+                patientId,          // patientId
+                patientName,        // patientName
+                doctor,             // doctor
+                appointmentType,    // appointmentType
+                department,         // department
+                urgency,            // urgency
+                appointmentDate,    // date
+                time,               // time
+                contact,            // contact
+                room,               // room
+                symptoms,           // symptoms
+                notes,              // notes
+                "Scheduled"         // status (default)
+            );
+            
+            // ADD TO DATABASE
+            AppointmentDatabase.getInstance().addAppointment(appointment);
             
             // Generate new appointment ID for next entry
             appointmentIdField.setText("APT-" + System.currentTimeMillis());
             
             // Clear validation message
             validationLabel.setText("");
-            clearForm(roomField, insuranceField, contactPersonField);
+            clearForm(roomField, timeField);
             
             return true;
             
@@ -405,17 +429,18 @@ public class ScheduleAppointmentForm {
     }
     
     private boolean validateForm() {
+        String patientName = patientNameField.getText();
         return !patientIdField.getText().isEmpty() &&
+               !patientName.equals("Patient not found") &&
                doctorComboBox.getValue() != null &&
                appointmentTypeComboBox.getValue() != null &&
                departmentComboBox.getValue() != null &&
                appointmentDatePicker.getValue() != null &&
-               timeSlotComboBox.getValue() != null &&
-               !durationField.getText().isEmpty() &&
+               !contactField.getText().isEmpty() &&
                !symptomsArea.getText().trim().isEmpty();
     }
     
-    private void clearForm(TextField roomField, TextField insuranceField, TextField contactPersonField) {
+    private void clearForm(TextField roomField, TextField timeField) {
         patientIdField.clear();
         patientNameField.clear();
         doctorComboBox.setValue(null);
@@ -423,34 +448,26 @@ public class ScheduleAppointmentForm {
         departmentComboBox.setValue(null);
         urgencyComboBox.setValue("Routine - Non-urgent");
         appointmentDatePicker.setValue(LocalDate.now().plusDays(1));
-        timeSlotComboBox.setValue(null);
-        durationField.clear();
+        contactField.clear();
         roomField.clear();
+        timeField.clear();
         symptomsArea.clear();
         notesArea.clear();
-        insuranceField.clear();
-        contactPersonField.clear();
-        updateTimeSlots(); // Refresh time slots
     }
     
     private void showSuccessAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Appointment Scheduled");
         alert.setHeaderText("Appointment Scheduled Successfully");
-        alert.setContentText("The appointment has been scheduled and confirmed.\nA confirmation email has been sent to the patient.");
+        alert.setContentText("The appointment has been scheduled and confirmed.");
         alert.showAndWait();
     }
     
-    private void checkDoctorAvailability() {
-        System.out.println("\n=== DOCTOR AVAILABILITY CHECK ===");
-        System.out.println("Feature: Check Doctor Availability");
-        System.out.println("This feature would check real-time doctor availability.");
-        System.out.println("=== END ===");
-        
+    private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Doctor Availability");
-        alert.setHeaderText("Availability Check Feature");
-        alert.setContentText("Real-time doctor availability checking feature will be implemented in the next update.");
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
     

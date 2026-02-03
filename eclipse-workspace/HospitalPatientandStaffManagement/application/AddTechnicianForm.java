@@ -6,6 +6,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+
 public class AddTechnicianForm {
     private VBox formContainer;
     private TextField nameField;
@@ -22,7 +23,7 @@ public class AddTechnicianForm {
     public AddTechnicianForm() {
         initializeForm();
     }
-    
+   
     private void initializeForm() {
         formContainer = new VBox();
         formContainer.setSpacing(20);
@@ -30,7 +31,7 @@ public class AddTechnicianForm {
         formContainer.setStyle("-fx-background-color: #f8f9fa;");
         
         // Title
-        Label title = new Label("Add New Doctor");
+        Label title = new Label("Add New Technician");
         title.setFont(new Font("Arial", 28));
         title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
         
@@ -46,28 +47,28 @@ public class AddTechnicianForm {
         ageField = createTextField(100, "Age");
         experienceField = createTextField(100, "Years of experience");
         phoneField = createTextField(200, "Phone number");
-        licenseField = createTextField(200, "Doctor license number");
-        qualificationField = createTextField(250, "e.g., BSN, RN, LPN");
+        licenseField = createTextField(200, "Technician license number");
+        qualificationField = createTextField(250, "e.g., MLT, RT, CST");
         
         // Gender ComboBox
         genderComboBox = new ComboBox<>();
-        genderComboBox.getItems().addAll("Male", "Female");
+        genderComboBox.getItems().addAll("Male", "Female", "Other");
         genderComboBox.setPromptText("Select gender");
         genderComboBox.setPrefWidth(150);
         
-        // Specialization ComboBox
+        // Specialization ComboBox for Technicians
         specializationComboBox = new ComboBox<>();
         specializationComboBox.getItems().addAll(
-            "General Doctor",
-            "Pediatric Doctor", 
-            "Critical Care Doctor",
-            "Surgical Doctor",
-            "Emergency Doctor",
-            "Cardiac Doctor",
-            "Neurology Doctor",
-            "Oncology Doctor",
-            "Geriatric Doctor",
-            "Psychiatric Doctor"
+            "Lab Technician",
+            "Radiology Technician", 
+            "Surgical Technician",
+            "Cardiology Technician",
+            "Emergency Technician",
+            "Ultrasound Technician",
+            "MRI Technician",
+            "X-Ray Technician",
+            "Pharmacy Technician",
+            "Medical Laboratory Technician"
         );
         specializationComboBox.setPromptText("Select specialization");
         specializationComboBox.setPrefWidth(250);
@@ -75,16 +76,16 @@ public class AddTechnicianForm {
         // Department ComboBox
         departmentComboBox = new ComboBox<>();
         departmentComboBox.getItems().addAll(
-            "General Ward",
-            "Pediatrics Department",
-            "Intensive Care Unit (ICU)",
+            "Laboratory Department",
+            "Radiology Department",
             "Surgery Department",
-            "Emergency Department",
             "Cardiology Department",
-            "Maternity Ward",
-            "Orthopedics Department",
-            "Oncology Department",
-            "Psychiatry Department"
+            "Emergency Department",
+            "Pharmacy Department",
+            "Medical Imaging Department",
+            "Pathology Department",
+            "Biomedical Department",
+            "Clinical Laboratory"
         );
         departmentComboBox.setPromptText("Select department");
         departmentComboBox.setPrefWidth(250);
@@ -143,7 +144,7 @@ public class AddTechnicianForm {
         row++;
         
         form.add(createLabel("Certifications:"), 0, row);
-        TextField certificationsField = createTextField(300, "e.g., CPR, BLS, ACLS (comma separated)");
+        TextField certificationsField = createTextField(300, "e.g., ASCP, ARRT, CPR (comma separated)");
         form.add(certificationsField, 1, row, 3, 1);
         row++;
         
@@ -156,11 +157,11 @@ public class AddTechnicianForm {
         HBox buttonContainer = new HBox(15);
         buttonContainer.setPadding(new Insets(20, 0, 0, 0));
         
-        // Add Nurse button
-        Button addButton = new Button("Add Doctor");
+        // Add Technician button
+        Button addButton = new Button("Add Technician");
         addButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         addButton.setOnAction(e -> {
-            if (saveNurse(addressField, certificationsField, validationLabel)) {
+            if (saveTechnician(addressField, certificationsField, validationLabel)) {
                 showSuccessAlert();
             }
         });
@@ -190,7 +191,7 @@ public class AddTechnicianForm {
         return label;
     }
     
-    private boolean saveNurse(TextField addressField, TextField certificationsField, Label validationLabel) {
+    private boolean saveTechnician(TextField addressField, TextField certificationsField, Label validationLabel) {
         if (!validateForm()) {
             validationLabel.setText("Please fill in all required fields (*)");
             return false;
@@ -198,22 +199,22 @@ public class AddTechnicianForm {
         
         try {
             // Get form values
-            String name = nameField.getText();
-            int age = Integer.parseInt(ageField.getText());
+            String name = nameField.getText().trim();
+            int age = Integer.parseInt(ageField.getText().trim());
             String gender = genderComboBox.getValue();
             String specialization = specializationComboBox.getValue();
             String department = departmentComboBox.getValue();
             String shift = shiftComboBox.getValue();
-            int experience = Integer.parseInt(experienceField.getText());
-            String phone = phoneField.getText();
-            String license = licenseField.getText();
-            String qualification = qualificationField.getText();
-            String address = addressField.getText();
-            String certifications = certificationsField.getText();
+            int experience = Integer.parseInt(experienceField.getText().trim());
+            String phone = phoneField.getText().trim();
+            String license = licenseField.getText().trim();
+            String qualification = qualificationField.getText().trim();
+            String address = addressField.getText().trim();
+            String certifications = certificationsField.getText().trim();
             
             // Validate data
             if (age < 21 || age > 65) {
-                validationLabel.setText("Nurse age must be between 21 and 65");
+                validationLabel.setText("Technician age must be between 21 and 65");
                 return false;
             }
             
@@ -227,12 +228,17 @@ public class AddTechnicianForm {
                 return false;
             }
             
-            // Generate nurse ID
-            String nurseId = "DOC-" + (name.hashCode() % 10000);
+            if (license.isEmpty()) {
+                validationLabel.setText("License number is required");
+                return false;
+            }
             
-            // Create Nurse object
-            Nurses nurse = new Nurses(
-                nurseId,
+            // Generate sequential technician ID starting from TEC-001
+            String technicianId = generateTechnicianId();
+            
+            // Create Technician object using the full constructor
+            Technicians technician = new Technicians(
+                technicianId,
                 name,
                 age,
                 specialization,
@@ -246,23 +252,36 @@ public class AddTechnicianForm {
             );
             
             // Set additional properties
-            nurse.setShift(shift);
-            nurse.setCertifications(certifications);
-            nurse.setDepartment(department);
-            nurse.setStatus("Available");
-            
-            // Save to database
-            NurseDatabase.getInstance().addNurse(nurse);
+            technician.setShift(shift);
+            technician.setCertifications(certifications);
+            technician.setDepartment(department);
+            technician.setStatus("Available");
             
             // Display success message
             System.out.println("\n" + "=".repeat(50));
-            System.out.println("DOCTOR ADDED TO DATABASE");
+            System.out.println("TECHNICIAN ADDED TO DATABASE");
             System.out.println("=".repeat(50));
-         //   nurse.displayInfo();
+            System.out.println("Technician ID: " + technicianId);
+            System.out.println("Name: " + name);
+            System.out.println("Age: " + age);
+            System.out.println("Gender: " + gender);
+            System.out.println("Specialization: " + specialization);
+            System.out.println("Experience: " + experience + " years");
+            System.out.println("Department: " + department);
+            System.out.println("Qualification: " + qualification);
+            System.out.println("License: " + license);
+            System.out.println("Phone: " + phone);
+            System.out.println("Address: " + address);
+            System.out.println("Shift: " + shift);
+            System.out.println("Certifications: " + certifications);
             System.out.println("=".repeat(50));
             
+            // Save to TechnicianDatabase
+            TechnicianDatabase db = TechnicianDatabase.getInstance();
+            db.addTechnician(technician);
+            
             // Show database status
-            NurseDatabase.getInstance().printAllNurses();
+            db.printAllTechnicians();
             
             // Clear form
             validationLabel.setText("");
@@ -275,21 +294,50 @@ public class AddTechnicianForm {
             return false;
         } catch (Exception e) {
             validationLabel.setText("An error occurred: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
     
+    // Helper method to generate sequential technician IDs
+    private String generateTechnicianId() {
+        // Get all current technicians
+        java.util.List<Technicians> allTechnicians = TechnicianDatabase.getInstance().getAllTechnicians();
+        
+        // Find the highest existing technician number
+        int maxNumber = 0;
+        for (Technicians technician : allTechnicians) {
+            String id = technician.getStaffId();
+            if (id != null && id.startsWith("TEC-")) {
+                try {
+                    // Extract the number part after "TEC-"
+                    String numberPart = id.substring(4); // Remove "TEC-"
+                    int number = Integer.parseInt(numberPart);
+                    if (number > maxNumber) {
+                        maxNumber = number;
+                    }
+                } catch (NumberFormatException e) {
+                    // Skip if not a valid number format
+                }
+            }
+        }
+        
+        // Generate next sequential ID
+        int nextNumber = maxNumber + 1;
+        return String.format("TEC-%03d", nextNumber); // TEC-001, TEC-002, etc.
+    }
+    
     private boolean validateForm() {
-        return !nameField.getText().isEmpty() &&
-               !ageField.getText().isEmpty() &&
+        return !nameField.getText().trim().isEmpty() &&
+               !ageField.getText().trim().isEmpty() &&
                genderComboBox.getValue() != null &&
                specializationComboBox.getValue() != null &&
                departmentComboBox.getValue() != null &&
                shiftComboBox.getValue() != null &&
-               !experienceField.getText().isEmpty() &&
-               !phoneField.getText().isEmpty() &&
-               !licenseField.getText().isEmpty() &&
-               !qualificationField.getText().isEmpty();
+               !experienceField.getText().trim().isEmpty() &&
+               !phoneField.getText().trim().isEmpty() &&
+               !licenseField.getText().trim().isEmpty() &&
+               !qualificationField.getText().trim().isEmpty();
     }
     
     private void clearForm(TextField addressField, TextField certificationsField) {
@@ -308,15 +356,15 @@ public class AddTechnicianForm {
     }
     
     private void showSuccessAlert() {
-        int totalNurses = NurseDatabase.getInstance().getNurseCount();
-        int availableNurses = NurseDatabase.getInstance().getAvailableNurseCount();
+        int totalTechnicians = TechnicianDatabase.getInstance().getTechnicianCount();
+        int availableTechnicians = TechnicianDatabase.getInstance().getAvailableTechnicianCount();
         
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
-        alert.setHeaderText("Doctor Added Successfully");
-        alert.setContentText("Nurse has been added to the nursing database.\n\n" +
-                           "Total doctors: " + totalNurses + "\n" +
-                           "Available doctors: " + availableNurses);
+        alert.setHeaderText("Technician Added Successfully");
+        alert.setContentText("Technician has been added to the technician database.\n\n" +
+                           "Total Technicians: " + totalTechnicians + "\n" +
+                           "Available Technicians: " + availableTechnicians);
         alert.showAndWait();
     }
     

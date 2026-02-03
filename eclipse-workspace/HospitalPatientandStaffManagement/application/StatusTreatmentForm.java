@@ -7,7 +7,7 @@ import javafx.scene.text.Font;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class UpdateTreatmentForm {
+public class StatusTreatmentForm {
    
     private VBox formContainer;
     private TextField treatmentIdField;
@@ -21,7 +21,7 @@ public class UpdateTreatmentForm {
     private TextArea progressNotesArea;
     private TextArea medicationsArea;
     
-    public UpdateTreatmentForm() {
+    public StatusTreatmentForm() {
         initializeForm();
     }
     private void initializeForm() {

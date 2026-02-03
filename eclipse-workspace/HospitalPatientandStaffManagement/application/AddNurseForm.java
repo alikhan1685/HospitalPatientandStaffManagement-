@@ -22,7 +22,7 @@ public class AddNurseForm {
     public AddNurseForm() {
         initializeForm();
     }
-    
+   
     private void initializeForm() {
         formContainer = new VBox();
         formContainer.setSpacing(20);
@@ -228,12 +228,12 @@ public class AddNurseForm {
                 return false;
             }
             
-            // Generate nurse ID
-            String nurseId = "NUR-" + (name.hashCode() % 10000);
+            // REMOVE THIS LINE: Don't generate ID manually
+            // String nurseId = "NUR-" + (name.hashCode() % 10000);
             
-            // Create Nurse object
+            // Create Nurse object WITHOUT ID - Database will generate it
             Nurses nurse = new Nurses(
-                nurseId,
+                null, // Let database generate ID (N001, N002, etc.)
                 name,
                 age,
                 specialization,
@@ -252,14 +252,24 @@ public class AddNurseForm {
             nurse.setDepartment(department);
             nurse.setStatus("Available");
             
-            // Save to database
+            // Save to database - Database will assign proper ID
             NurseDatabase.getInstance().addNurse(nurse);
             
-            // Display success message
+            // Display success message with the generated ID
             System.out.println("\n" + "=".repeat(50));
             System.out.println("NURSE ADDED TO DATABASE");
             System.out.println("=".repeat(50));
-         //   nurse.displayInfo();
+            System.out.println("Nurse ID: " + nurse.getStaffId());
+            System.out.println("Name: " + nurse.getName());
+            System.out.println("Age: " + nurse.getAge());
+            System.out.println("Gender: " + nurse.getGender());
+            System.out.println("Department: " + nurse.getDepartment());
+            System.out.println("Specialization: " + nurse.getSpecialization());
+            System.out.println("Shift: " + nurse.getShift());
+            System.out.println("Experience: " + nurse.getExperience() + " years");
+            System.out.println("Qualification: " + nurse.getQualification());
+            System.out.println("License: " + nurse.getLicenseNumber());
+            System.out.println("Status: " + nurse.getStatus());
             System.out.println("=".repeat(50));
             
             // Show database status
@@ -309,13 +319,22 @@ public class AddNurseForm {
     }
     
     private void showSuccessAlert() {
+        // Get the latest nurse from database to show the assigned ID
         int totalNurses = NurseDatabase.getInstance().getNurseCount();
         int availableNurses = NurseDatabase.getInstance().getAvailableNurseCount();
+        
+        // Get the last added nurse to display their ID
+        String lastNurseId = "";
+        if (totalNurses > 0) {
+            Nurses lastNurse = NurseDatabase.getInstance().getAllNurses().get(totalNurses - 1);
+            lastNurseId = lastNurse.getStaffId();
+        }
         
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText("Nurse Added Successfully");
         alert.setContentText("Nurse has been added to the nursing database.\n\n" +
+                           "Nurse ID: " + lastNurseId + "\n" +
                            "Total nurses: " + totalNurses + "\n" +
                            "Available nurses: " + availableNurses);
         alert.showAndWait();

@@ -1,10 +1,12 @@
 package application;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 public class PatientDatabase {
     private static PatientDatabase instance;
     private List<Patients> patients;
+    private int nextPatientId = 1;
     
     private PatientDatabase() {
         patients = new ArrayList<>();
@@ -18,13 +20,61 @@ public class PatientDatabase {
     }
     
     public void addPatient(Patients patient) {
+        // Check if patient has ID, if not generate one
+        if (patient.getId() == null || patient.getId().isEmpty()) {
+            String newId = generateNextPatientId();
+            patient.setId(newId);
+        }
+        
         patients.add(patient);
         System.out.println("✅ Patient added to database: " + patient.getName() + " (ID: " + patient.getId() + ")");
         System.out.println("📊 Total patients in database: " + patients.size());
     }
     
+    public String generateNextPatientId() {
+        if (patients.isEmpty()) {
+            return String.format("P%03d", 1);
+        }
+        
+        // Find the lowest available ID starting from 1
+        for (int i = 1; i <= 999; i++) {
+            String potentialId = String.format("P%03d", i);
+            boolean idExists = false;
+            
+            for (Patients patient : patients) {
+                if (patient.getId().equals(potentialId)) {
+                    idExists = true;
+                    break;
+                }
+            }
+            
+            if (!idExists) {
+                return potentialId;
+            }
+        }
+        
+        // If all IDs 1-999 are used, find the maximum ID and add 1
+        int maxNumber = 0;
+        for (Patients patient : patients) {
+            String id = patient.getId();
+            if (id != null && id.startsWith("P")) {
+                try {
+                    String numberPart = id.substring(1);
+                    int number = Integer.parseInt(numberPart);
+                    if (number > maxNumber) {
+                        maxNumber = number;
+                    }
+                } catch (NumberFormatException e) {
+                    // Skip if not a valid number format
+                }
+            }
+        }
+        
+        return String.format("P%03d", maxNumber + 1);
+    }
+    
     public List<Patients> getAllPatients() {
-        return new ArrayList<>(patients); 
+        return new ArrayList<>(patients);
     }
     
     public List<Patients> searchById(String id) {
@@ -48,7 +98,21 @@ public class PatientDatabase {
         return results;
     }
     
-    // NEW METHOD: Get patient name by ID
+    public boolean deletePatient(String patientId) {
+        Iterator<Patients> iterator = patients.iterator();
+        while (iterator.hasNext()) {
+            Patients patient = iterator.next();
+            if (patient.getId().equals(patientId)) {
+                iterator.remove();
+                System.out.println("❌ Patient deleted from database: " + patient.getName() + " (ID: " + patientId + ")");
+                System.out.println("📊 Total patients in database: " + patients.size());
+                return true;
+            }
+        }
+        System.out.println("⚠️ Patient not found for deletion: " + patientId);
+        return false;
+    }
+    
     public String getPatientName(String patientId) {
         List<Patients> foundPatients = searchById(patientId);
         if (!foundPatients.isEmpty()) {
@@ -58,12 +122,10 @@ public class PatientDatabase {
         }
     }
     
-    // NEW METHOD: Check if patient exists
     public boolean patientExists(String patientId) {
         return !searchById(patientId).isEmpty();
     }
     
-    // NEW METHOD: Get patient by ID (returns null if not found)
     public Patients getPatient(String patientId) {
         List<Patients> foundPatients = searchById(patientId);
         if (!foundPatients.isEmpty()) {
@@ -72,12 +134,10 @@ public class PatientDatabase {
         return null;
     }
     
-    // NEW METHOD: Get total patient count
     public int getPatientCount() {
         return patients.size();
     }
     
-    // Optional: Print all patients (for debugging)
     public void printAllPatients() {
         System.out.println("\n" + "=".repeat(70));
         System.out.println("PATIENT DATABASE (" + patients.size() + " patients)");

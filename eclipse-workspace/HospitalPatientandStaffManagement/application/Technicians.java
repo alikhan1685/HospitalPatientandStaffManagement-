@@ -2,71 +2,58 @@ package application;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 
 public class Technicians extends Staff {
-	public String id;
     private static final String role = "Technician";
     private String ward;
-    private String specialization;
     private String qualification;
-    private int experience;
     private String licenseNo;
     private List<String> assignedPatients;
     private String shift;
     private int maxPatients;
     private int currentPatientsCount;
-    private String department;
     private String certifications;
-    private String assignedTechnicianId;
+    private String assignedDoctorId;
     
     // Constructor
     public Technicians(String id, String name, int age, String specialization, 
                  String qualification, int experience, String licenseNo, 
                  String gender, String address, String phone, String ward) {
-        super();
-        try {
-            this.id = id;
-            this.name = name;
-            this.age = age;
-            this.specialization = specialization;
-            this.qualification = qualification;
-            this.experience = experience;
-            this.licenseNo = licenseNo;
-            this.gender = gender;
-            this.address = address;
-            this.phone = phone;
-            this.status = "Available";
-            this.maxPatients = 15;
-            this.currentPatientsCount = 0;
-            this.department = "General Ward";
-            this.shift = "Day Shift (7 AM - 3 PM)";
-            this.certifications = "";
-            this.ward = ward;
-            this.assignedTechnicianId = "";
-            
-            this.assignedPatients = new ArrayList<>();
-            
-        } catch (Exception e) {
-            System.out.println("Error Adding Nurse: " + e);
-        }
+        // Call parent constructor properly
+        super(id, name, age, gender, specialization, experience, licenseNo, 
+              qualification, ward, phone, address, "Available");
+        
+        this.licenseNo = licenseNo;
+        this.qualification = qualification;
+        this.ward = ward;
+        this.maxPatients = 15;
+        this.currentPatientsCount = 0;
+        this.shift = "Day Shift (7 AM - 3 PM)";
+        this.certifications = "";
+        this.assignedDoctorId = "";
+        this.assignedPatients = new ArrayList<>();
     }
     
-    // Getters and Setters
-    public String getId() {
-        return this.id;  // 'id' should be inherited from Staff class
+    // Alternative constructor for TechnicianDatabase
+    public Technicians(String staffId, String name, String specialization, int experience, String status) {
+        super(staffId, name, specialization, experience, status);
+        this.maxPatients = 15;
+        this.currentPatientsCount = 0;
+        this.shift = "Day Shift (7 AM - 3 PM)";
+        this.assignedPatients = new ArrayList<>();
     }
+    
+    // Getter for ID - Override to use parent's staffId
+    public String getId() {
+        return super.getStaffId(); // This gets the staffId from parent class
+    }
+    
+    // Other getters and setters
     public String getWard() { return ward; }
     public void setWard(String ward) { this.ward = ward; }
     
-    public String getSpecialization() { return specialization; }
-    public void setSpecialization(String specialization) { this.specialization = specialization; }
-    
     public String getQualification() { return qualification; }
     public void setQualification(String qualification) { this.qualification = qualification; }
-    
-    public int getExperience() { return experience; }
-    public void setExperience(int experience) { this.experience = experience; }
     
     public String getLicenseNo() { return licenseNo; }
     public void setLicenseNo(String licenseNo) { this.licenseNo = licenseNo; }
@@ -83,14 +70,11 @@ public class Technicians extends Staff {
     
     public String getRole() { return role; }
     
-    public String getDepartment() { return department; }
-    public void setDepartment(String department) { this.department = department; }
-    
     public String getCertifications() { return certifications; }
     public void setCertifications(String certifications) { this.certifications = certifications; }
     
-    public String getAssignedDoctorId() { return assignedTechnicianId; }
-    public void setAssignedDoctorId(String assignedDoctorId) { this.assignedTechnicianId = assignedTechnicianId; }
+    public String getAssignedDoctorId() { return assignedDoctorId; }
+    public void setAssignedDoctorId(String assignedDoctorId) { this.assignedDoctorId = assignedDoctorId; }
     
     // Business Logic Methods
     public boolean assignPatient(String patientId) {
@@ -102,7 +86,7 @@ public class Technicians extends Staff {
             currentPatientsCount++;
             
             if (currentPatientsCount >= maxPatients) {
-                status = "At Capacity";
+                setStatus("At Capacity");
             }
             
             return true;
@@ -115,8 +99,8 @@ public class Technicians extends Staff {
             assignedPatients.remove(patientId);
             currentPatientsCount--;
             
-            if (currentPatientsCount < maxPatients && status.equals("At Capacity")) {
-                status = "Available";
+            if (currentPatientsCount < maxPatients && getStatus().equals("At Capacity")) {
+                setStatus("Available");
             }
             
             return true;
@@ -125,10 +109,11 @@ public class Technicians extends Staff {
     }
     
     public boolean canAcceptMorePatients() {
-        return currentPatientsCount < maxPatients && status.equals("Available");
+        return currentPatientsCount < maxPatients && getStatus().equals("Available");
     }
     
     public String getAvailabilityStatus() {
+        String status = getStatus();
         if (status.equals("Available") && currentPatientsCount < maxPatients) {
             return "Available for new patients";
         } else if (status.equals("At Capacity")) {
@@ -145,5 +130,28 @@ public class Technicians extends Staff {
             return (currentPatientsCount * 100) / maxPatients;
         }
         return 0;
+    }
+    
+    @Override
+    public void displayBasicInfo() {
+        System.out.println("\n=== Technician Information ===");
+        System.out.println("Technician ID: " + getStaffId());
+        System.out.println("Name: " + getName());
+        System.out.println("Age: " + getAge());
+        System.out.println("Gender: " + getGender());
+        System.out.println("Specialization: " + getSpecialization());
+        System.out.println("Experience: " + getExperience() + " years");
+        System.out.println("Status: " + getStatus());
+        System.out.println("Phone: " + getPhone());
+        System.out.println("Address: " + getAddress());
+        System.out.println("Department: " + getDepartment());
+        System.out.println("Qualification: " + qualification);
+        System.out.println("License: " + licenseNo);
+        System.out.println("Shift: " + shift);
+        System.out.println("Certifications: " + certifications);
+        System.out.println("Max Patients: " + maxPatients);
+        System.out.println("Current Patients: " + currentPatientsCount);
+        System.out.println("Date Joined: " + getDateJoined());
+        System.out.println("========================\n");
     }
 }

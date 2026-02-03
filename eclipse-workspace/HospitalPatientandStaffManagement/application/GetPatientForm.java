@@ -2,101 +2,151 @@ package application;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import java.util.List;
 
 public class GetPatientForm {
-    
-    private VBox formContainer;
+   
+    private VBox container;
+    private TableView<Patients> patientTable;
+    private ObservableList<Patients> patientData;
     private TextField searchField;
     private ComboBox<String> searchTypeComboBox;
-    private Button searchButton;
-    private VBox resultsContainer;
-    private TextArea detailsArea;
-    private Button clearButton;
-    private PatientDatabase patientDatabase;
     
     public GetPatientForm() {
+        patientData = FXCollections.observableArrayList();
         initializeForm();
-        patientDatabase = PatientDatabase.getInstance();
     }
+    
     private void initializeForm() {
-        formContainer = new VBox(20);
-        formContainer.setPadding(new Insets(20));
-        formContainer.setStyle("-fx-background-color: #f8f9fa;");
+        container = new VBox();
+        container.setSpacing(20);
+        container.setPadding(new Insets(20));
+        container.setStyle("-fx-background-color: #f8f9fa;");
         
         // Title
-        Label title = new Label("Find / View Patient");
+        Label title = new Label("PATIENT DATABASE");
         title.setFont(new Font("Arial", 28));
         title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
         
         // Search Panel
-        HBox searchPanel = new HBox(10);
+        HBox searchPanel = new HBox(15);
         searchPanel.setPadding(new Insets(15));
         searchPanel.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8;");
         
         searchTypeComboBox = new ComboBox<>();
-        searchTypeComboBox.getItems().addAll("Search by ID", "Search by Name", "Search by Phone", "View All Patients");
-        searchTypeComboBox.setValue("Search by ID");
+        searchTypeComboBox.getItems().addAll("Search by ID", "Search by Name", "View All Patients");
+        searchTypeComboBox.setValue("View All Patients");
         searchTypeComboBox.setPrefWidth(150);
         
         searchField = new TextField();
         searchField.setPromptText("Enter search term...");
         searchField.setPrefWidth(250);
         
-        searchButton = new Button("🔍 Search");
+        Button searchButton = new Button("Search");
         searchButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;");
-        searchButton.setOnAction(e -> searchPatient());
+        searchButton.setOnAction(e -> searchPatients());
         
-        clearButton = new Button("Clear");
-        clearButton.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;");
-        clearButton.setOnAction(e -> {
-            searchField.clear();
-            resultsContainer.setVisible(false);
-        });
-        
-        // Add database status button
-        Button dbStatusButton = new Button("📊 DB Status");
-        dbStatusButton.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;");
-        dbStatusButton.setOnAction(e -> showDatabaseStatus());
+        Button refreshButton = new Button("Refresh List");
+        refreshButton.setStyle("-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;");
+        refreshButton.setOnAction(e -> refreshPatientList());
         
         searchPanel.getChildren().addAll(
-            new Label("Search:"),
+            new Label("Search Type:"),
             searchTypeComboBox,
             searchField,
             searchButton,
-            clearButton,
-            dbStatusButton
+            refreshButton
         );
         
-        // Results Container
-        resultsContainer = new VBox(15);
-        resultsContainer.setPadding(new Insets(15));
-        resultsContainer.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8;");
+        // Table setup
+        patientTable = new TableView<>();
+        patientTable.setPrefWidth(900);
         
-        // Patient Details Area
-        detailsArea = new TextArea();
-        detailsArea.setPrefRowCount(15);
-        detailsArea.setEditable(false);
-        detailsArea.setWrapText(true);
-        detailsArea.setStyle("-fx-font-family: 'Monospaced'; -fx-font-size: 12px;");
+        // Define columns for patient information
+        TableColumn<Patients, String> idCol = new TableColumn<>("Patient ID");
+        idCol.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getId()));
+        idCol.setPrefWidth(100);
         
-        Label resultsLabel = new Label("Patient Details:");
-        resultsLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;");
+        TableColumn<Patients, String> nameCol = new TableColumn<>("Patient Name");
+        nameCol.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getName()));
+        nameCol.setPrefWidth(200);
         
-        resultsContainer.getChildren().addAll(resultsLabel, detailsArea);
-        resultsContainer.setVisible(false);
+        TableColumn<Patients, String> ageCol = new TableColumn<>("Age");
+        ageCol.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(String.valueOf(cellData.getValue().getAge())));
+        ageCol.setPrefWidth(80);
         
-        // Add all to form
-        formContainer.getChildren().addAll(title, searchPanel, resultsContainer);
+        TableColumn<Patients, String> genderCol = new TableColumn<>("Gender");
+        genderCol.setCellValueFactory(cellData -> {
+            String gender = cellData.getValue().getGender();
+            return new SimpleStringProperty(gender != null ? gender : "N/A");
+        });
+        genderCol.setPrefWidth(100);
+        
+        TableColumn<Patients, String> statusCol = new TableColumn<>("Status");
+        statusCol.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().isAdmitted() ? "Admitted" : "Outpatient"));
+        statusCol.setPrefWidth(120);
+        
+        TableColumn<Patients, String> doctorCol = new TableColumn<>("Assigned Doctor");
+        doctorCol.setCellValueFactory(cellData -> {
+            String doctor = cellData.getValue().getAssignedDoctorName();
+            return new SimpleStringProperty(doctor != null ? doctor : "Not Assigned");
+        });
+        doctorCol.setPrefWidth(200);
+        
+        // Add columns to table
+        patientTable.getColumns().addAll(idCol, nameCol, ageCol, genderCol, statusCol, doctorCol);
+        
+        // Sort by ID column initially
+        patientTable.getSortOrder().add(idCol);
+        
+        // Buttons for actions
+        HBox buttonBox = new HBox(15);
+        
+        Button viewDetailsButton = new Button("View Patient Details");
+        viewDetailsButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        viewDetailsButton.setOnAction(e -> viewPatientDetails());
+        
+        Button updateStatusButton = new Button("Update Admission Status");
+        updateStatusButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
+        updateStatusButton.setOnAction(e -> updatePatientStatus());
+        
+        Button deleteButton = new Button("Delete Patient");
+        deleteButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
+        deleteButton.setOnAction(e -> deletePatient());
+        
+        Button clearSearchButton = new Button("Clear Search");
+        clearSearchButton.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold;");
+        clearSearchButton.setOnAction(e -> {
+            searchField.clear();
+            refreshPatientList();
+        });
+        
+        buttonBox.getChildren().addAll(viewDetailsButton, updateStatusButton, deleteButton, clearSearchButton);
+        
+        // Add all components to container
+        container.getChildren().addAll(title, searchPanel, patientTable, buttonBox);
+        
+        // Initial load
+        refreshPatientList();
     }
     
-    private void searchPatient() {
+    private void searchPatients() {
         String searchTerm = searchField.getText().trim();
         String searchType = searchTypeComboBox.getValue();
         
         List<Patients> results;
+        PatientDatabase patientDatabase = PatientDatabase.getInstance();
         
         if (searchType.equals("View All Patients")) {
             results = patientDatabase.getAllPatients();
@@ -119,120 +169,232 @@ public class GetPatientForm {
             }
         }
         
-        displayResults(results);
+        updateTable(results);
     }
     
-    private void displayResults(List<Patients> patients) {
-        if (patients.isEmpty()) {
-            detailsArea.setText("No patients found matching your search criteria.");
-            resultsContainer.setVisible(true);
-            return;
+    private void updateTable(List<Patients> patients) {
+        patientData.clear();
+        patientData.addAll(patients);
+        patientTable.setItems(patientData);
+        patientTable.sort();
+    }
+    
+    private void refreshPatientList() {
+        List<Patients> allPatients = PatientDatabase.getInstance().getAllPatients();
+        updateTable(allPatients);
+        
+        // Show summary statistics in console
+        int totalPatients = allPatients.size();
+        int admittedPatients = 0;
+        
+        for (Patients patient : allPatients) {
+            if (patient.isAdmitted()) {
+                admittedPatients++;
+            }
         }
         
-        StringBuilder details = new StringBuilder();
-        
-        if (patients.size() == 1) {
-            Patients patient = patients.get(0);
-            details.append("╔══════════════════════════════════════════════════════════╗\n");
-            details.append("║                    PATIENT DETAILS                       ║\n");
-            details.append("╚══════════════════════════════════════════════════════════╝\n\n");
+        System.out.println("\n" + "=".repeat(50));
+        System.out.println("PATIENT DATABASE REFRESHED");
+        System.out.println("=".repeat(50));
+        System.out.println("Total Patients: " + totalPatients);
+        System.out.println("Admitted Patients: " + admittedPatients);
+        System.out.println("Outpatients: " + (totalPatients - admittedPatients));
+        System.out.println("=".repeat(50));
+    }
+    
+    private void viewPatientDetails() {
+        Patients selectedPatient = patientTable.getSelectionModel().getSelectedItem();
+        if (selectedPatient != null) {
+            // Create a dialog to show patient details
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Patient Details");
+            dialog.setHeaderText("Details for: " + selectedPatient.getName() + " (ID: " + selectedPatient.getId() + ")");
             
-            details.append("┌──────────────────────────────────────────────────────────┐\n");
-            details.append("│ BASIC INFORMATION                                        │\n");
-            details.append("├──────────────────────────────────────────────────────────┤\n");
-            details.append("│ Patient ID: ").append(patient.getId()).append("\n");
-            details.append("│ Name: ").append(patient.getName()).append("\n");
-            details.append("│ Age: ").append(patient.getAge()).append("\n");
-            details.append("│ Gender: ").append(patient.getGender() != null ? patient.getGender() : "Not specified").append("\n");
-            details.append("│ Blood Group: ").append(patient.getBloodGroup() != null ? patient.getBloodGroup() : "Not specified").append("\n");
-            details.append("│ Status: ").append(patient.isAdmitted() ? "● ADMITTED" : "○ OUTPATIENT").append("\n");
-            details.append("└──────────────────────────────────────────────────────────┘\n\n");
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
             
-            details.append("┌──────────────────────────────────────────────────────────┐\n");
-            details.append("│ CONTACT INFORMATION                                      │\n");
-            details.append("├──────────────────────────────────────────────────────────┤\n");
-            details.append("│ Address: ").append(patient.getAddress() != null ? patient.getAddress() : "Not specified").append("\n");
-            details.append("│ Phone: ").append(patient.getPhone() != null ? patient.getPhone() : "Not specified").append("\n");
-            details.append("└──────────────────────────────────────────────────────────┘\n\n");
+            // Create scrollable content with text that can be copied
+            VBox content = new VBox(10);
+            content.setPadding(new Insets(20));
             
-            details.append("┌──────────────────────────────────────────────────────────┐\n");
-            details.append("│ MEDICAL INFORMATION                                      │\n");
-            details.append("├──────────────────────────────────────────────────────────┤\n");
-            details.append("│ Assigned Doctor: ").append(patient.getAssignedDoctorName() != null ? patient.getAssignedDoctorName() : "Not assigned").append("\n");
-            details.append("├──────────────────────────────────────────────────────────┤\n");
-            details.append("│ MEDICAL HISTORY:\n");
-            if (patient.getMedicalHistory() == null || patient.getMedicalHistory().isEmpty()) {
-                details.append("│   No medical history recorded\n");
+            // Create TextArea for copyable text
+            TextArea detailsText = new TextArea();
+            detailsText.setEditable(false);
+            detailsText.setWrapText(true);
+            detailsText.setPrefRowCount(15);
+            detailsText.setPrefWidth(400);
+            detailsText.setStyle("-fx-font-family: 'Consolas', 'Monospaced'; -fx-font-size: 12px;");
+            
+            // Format patient details as plain text that can be copied
+            StringBuilder details = new StringBuilder();
+            details.append("=== PATIENT DETAILS ===\n\n");
+            details.append("PATIENT ID: ").append(selectedPatient.getId()).append("\n");
+            details.append("NAME: ").append(selectedPatient.getName()).append("\n");
+            details.append("AGE: ").append(selectedPatient.getAge()).append("\n");
+            details.append("GENDER: ").append(selectedPatient.getGender() != null ? selectedPatient.getGender() : "Not specified").append("\n");
+            details.append("BLOOD GROUP: ").append(selectedPatient.getBloodGroup() != null ? selectedPatient.getBloodGroup() : "Not specified").append("\n");
+            details.append("STATUS: ").append(selectedPatient.isAdmitted() ? "ADMITTED" : "OUTPATIENT").append("\n\n");
+            
+            details.append("--- CONTACT INFORMATION ---\n");
+            details.append("PHONE: ").append(selectedPatient.getPhone() != null ? selectedPatient.getPhone() : "Not specified").append("\n");
+            details.append("ADDRESS: ").append(selectedPatient.getAddress() != null ? selectedPatient.getAddress() : "Not specified").append("\n\n");
+            
+            details.append("--- MEDICAL INFORMATION ---\n");
+            details.append("ASSIGNED DOCTOR: ").append(selectedPatient.getAssignedDoctorName() != null ? selectedPatient.getAssignedDoctorName() : "Not assigned").append("\n");
+            
+            if (selectedPatient.getMedicalHistory() != null && !selectedPatient.getMedicalHistory().isEmpty()) {
+                details.append("\nMEDICAL HISTORY:\n");
+                for (String history : selectedPatient.getMedicalHistory()) {
+                    details.append("• ").append(history).append("\n");
+                }
             } else {
-                details.append("│   ").append(patient.getMedicalHistory()).append("\n");
+                details.append("\nMEDICAL HISTORY: No medical history recorded\n");
             }
-            details.append("└──────────────────────────────────────────────────────────┘\n");
             
+            detailsText.setText(details.toString());
+            
+            // Add copy button
+            Button copyButton = new Button("Copy to Clipboard");
+            copyButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+            copyButton.setOnAction(e -> {
+                Clipboard clipboard = Clipboard.getSystemClipboard();
+                ClipboardContent contentClip = new ClipboardContent();
+                contentClip.putString(detailsText.getText());
+                clipboard.setContent(contentClip);
+                
+                Alert copiedAlert = new Alert(Alert.AlertType.INFORMATION);
+                copiedAlert.setTitle("Copied");
+                copiedAlert.setHeaderText("Text Copied");
+                copiedAlert.setContentText("Patient details copied to clipboard!");
+                copiedAlert.showAndWait();
+            });
+            
+            HBox buttonBox = new HBox(10, copyButton);
+            buttonBox.setPadding(new Insets(10, 0, 0, 0));
+            
+            content.getChildren().addAll(detailsText, buttonBox);
+            
+            // Create a scroll pane in case content is too long
+            ScrollPane scrollPane = new ScrollPane(content);
+            scrollPane.setFitToWidth(true);
+            scrollPane.setPrefHeight(400);
+            
+            dialog.getDialogPane().setContent(scrollPane);
+            dialog.getDialogPane().setPrefSize(450, 450);
+            dialog.showAndWait();
         } else {
-            details.append("╔══════════════════════════════════════════════════════════╗\n");
-            details.append("║                SEARCH RESULTS (").append(patients.size()).append(" patients)               ║\n");
-            details.append("╚══════════════════════════════════════════════════════════╝\n\n");
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Patient Selected");
+            alert.setContentText("Please select a patient from the table to view details.");
+            alert.showAndWait();
+        }
+    }
+    
+    private void updatePatientStatus() {
+        Patients selectedPatient = patientTable.getSelectionModel().getSelectedItem();
+        if (selectedPatient != null) {
+            // Create a dialog to update status
+            Dialog<String> dialog = new Dialog<>();
+            dialog.setTitle("Update Patient Status");
+            dialog.setHeaderText("Update status for: " + selectedPatient.getName());
             
-            details.append("┌────┬────────────┬─────────────────────┬─────┬─────────────┬────────────┬─────────────────────┐\n");
-            details.append("│ No │    ID      │        Name         │ Age │    Gender   │   Status   │       Doctor        │\n");
-            details.append("├────┼────────────┼─────────────────────┼─────┼─────────────┼────────────┼─────────────────────┤\n");
+            // Set the button types
+            ButtonType updateButtonType = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
             
-            for (int i = 0; i < patients.size(); i++) {
-                Patients patient = patients.get(i);
-                String gender = patient.getGender();
-                if (gender == null || gender.isEmpty()) {
-                    gender = "-";
-                } else if (gender.length() > 6) {
-                    gender = gender.substring(0, 4) + ".";
+            // Create the status ComboBox
+            ComboBox<String> statusCombo = new ComboBox<>();
+            statusCombo.getItems().addAll("Admit Patient", "Discharge Patient");
+            statusCombo.setValue(selectedPatient.isAdmitted() ? "Discharge Patient" : "Admit Patient");
+            
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+            
+            grid.add(new Label("Action:"), 0, 0);
+            grid.add(statusCombo, 1, 0);
+            
+            dialog.getDialogPane().setContent(grid);
+            
+            // Convert the result
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == updateButtonType) {
+                    return statusCombo.getValue();
+                }
+                return null;
+            });
+            
+            // Show dialog and update if confirmed
+            dialog.showAndWait().ifPresent(action -> {
+                if (action.equals("Admit Patient")) {
+                    selectedPatient.setAdmitted(true);
+                } else {
+                    selectedPatient.setAdmitted(false);
                 }
                 
-                details.append(String.format("│ %2d │ %-10s │ %-19s │ %3d │ %-11s │ %-10s │ %-19s │\n",
-                    i + 1,
-                    patient.getId(),
-                    patient.getName().length() > 19 ? patient.getName().substring(0, 16) + "..." : patient.getName(),
-                    patient.getAge(),
-                    gender,
-                    patient.isAdmitted() ? "Admitted" : "Outpatient",
-                    patient.getAssignedDoctorName() != null ? 
-                        (patient.getAssignedDoctorName().length() > 19 ? 
-                         patient.getAssignedDoctorName().substring(0, 16) + "..." : 
-                         patient.getAssignedDoctorName()) : 
-                        "Not assigned"
-                ));
-            }
-            
-            details.append("└────┴────────────┴─────────────────────┴─────┴─────────────┴────────────┴─────────────────────┘\n\n");
-            details.append("Note: Select 'Search by ID' with a specific ID to view full details.\n");
+                refreshPatientList();
+                
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Status Updated");
+                alert.setHeaderText("Patient Status Updated");
+                alert.setContentText(selectedPatient.getName() + " has been " + 
+                                   (action.equals("Admit Patient") ? "admitted" : "discharged"));
+                alert.showAndWait();
+            });
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Patient Selected");
+            alert.setContentText("Please select a patient from the table to update their status.");
+            alert.showAndWait();
         }
-        
-        detailsArea.setText(details.toString());
-        resultsContainer.setVisible(true);
     }
     
-    private void showDatabaseStatus() {
-        List<Patients> allPatients = patientDatabase.getAllPatients();
-        int patientCount = allPatients.size();
-        
-        StringBuilder status = new StringBuilder();
-        
-        status.append("╔══════════════════════════════════════════════════════════╗\n");
-        status.append("║              PATIENT DATABASE STATUS                     ║\n");
-        status.append("╚══════════════════════════════════════════════════════════╝\n\n");
-        status.append("Total patients in database: ").append(patientCount).append("\n\n");
-        
-        if (patientCount > 0) {
-            status.append("Patient IDs in database:\n");
-            for (int i = 0; i < allPatients.size(); i++) {
-                Patients p = allPatients.get(i);
-                status.append(String.format("%2d. %s - %s (Age: %d)\n", 
-                    i + 1, p.getId(), p.getName(), p.getAge()));
-            }
+    private void deletePatient() {
+        Patients selectedPatient = patientTable.getSelectionModel().getSelectedItem();
+        if (selectedPatient != null) {
+            // Create a confirmation dialog
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Delete Patient");
+            confirmAlert.setHeaderText("Delete Patient: " + selectedPatient.getName());
+            confirmAlert.setContentText("Are you sure you want to delete this patient?\n" +
+                                      "Patient ID: " + selectedPatient.getId() + "\n" +
+                                      "Name: " + selectedPatient.getName() + "\n" +
+                                      "This action cannot be undone and all patient data will be lost.");
+            
+            // Show confirmation dialog
+            confirmAlert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    // Delete from database
+                    boolean deleted = PatientDatabase.getInstance().deletePatient(selectedPatient.getId());
+                    
+                    if (deleted) {
+                        refreshPatientList();
+                        
+                        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                        successAlert.setTitle("Patient Deleted");
+                        successAlert.setHeaderText("Patient Deleted Successfully");
+                        successAlert.setContentText("Patient " + selectedPatient.getName() + 
+                                                 " (ID: " + selectedPatient.getId() + 
+                                                 ") has been deleted from the database.");
+                        successAlert.showAndWait();
+                    } else {
+                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                        errorAlert.setTitle("Delete Failed");
+                        errorAlert.setHeaderText("Failed to Delete Patient");
+                        errorAlert.setContentText("Could not delete patient from database.");
+                        errorAlert.showAndWait();
+                    }
+                }
+            });
         } else {
-            status.append("Database is empty. Add patients using the 'Add Patient' form.\n");
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Patient Selected");
+            alert.setContentText("Please select a patient from the table to delete.");
+            alert.showAndWait();
         }
-        
-        detailsArea.setText(status.toString());
-        resultsContainer.setVisible(true);
     }
     
     private void showAlert(String title, String message) {
@@ -244,6 +406,6 @@ public class GetPatientForm {
     }
     
     public VBox getForm() {
-        return formContainer;
+        return container;
     }
 }
