@@ -9,7 +9,6 @@ public class TechnicianDatabase {
     
     private TechnicianDatabase() {
         technicians = new ArrayList<>();
-        initializeSampleTechnicians();
     }
     
     public static TechnicianDatabase getInstance() {
@@ -110,87 +109,7 @@ public class TechnicianDatabase {
         return false;
     }
     
-    private void initializeSampleTechnicians() {
-        if (technicians.isEmpty()) {
-            System.out.println("📝 Initializing sample technician data...");
-            
-            // Sample Technicians
-            Technicians tech1 = new Technicians(
-                "TEC-001",
-                "David Wilson",
-                35,
-                "Lab Technician",
-                "MLT",
-                8,
-                "TEC-123456",
-                "Male",
-                "Medical Lab, Room 101",
-                "5550202345",
-                "Laboratory"
-            );
-            tech1.setDepartment("Laboratory Department");
-            tech1.setShift("Day Shift (7 AM - 3 PM)");
-            tech1.setCertifications("ASCP, Phlebotomy");
-            technicians.add(tech1);
-            
-            Technicians tech2 = new Technicians(
-                "TEC-002",
-                "Lisa Garcia",
-                28,
-                "Radiology Technician",
-                "RT",
-                5,
-                "TEC-234567",
-                "Female",
-                "Radiology Wing, Room 205",
-                "5550303456",
-                "Radiology"
-            );
-            tech2.setDepartment("Radiology Department");
-            tech2.setShift("Evening Shift (3 PM - 11 PM)");
-            tech2.setCertifications("ARRT, BLS");
-            technicians.add(tech2);
-            
-            Technicians tech3 = new Technicians(
-                "TEC-003",
-                "James Miller",
-                40,
-                "Surgical Technician",
-                "CST",
-                12,
-                "TEC-345678",
-                "Male",
-                "Surgical Wing, Room 305",
-                "5550404567",
-                "Operating Room"
-            );
-            tech3.setDepartment("Surgery Department");
-            tech3.setShift("Morning Shift (6 AM - 2 PM)");
-            tech3.setCertifications("CST, CPR");
-            technicians.add(tech3);
-            
-            Technicians tech4 = new Technicians(
-                "TEC-004",
-                "Maria Rodriguez",
-                32,
-                "Cardiology Technician",
-                "CCT",
-                7,
-                "TEC-456789",
-                "Female",
-                "Cardiology Lab, Room 401",
-                "5550505678",
-                "Cardiology"
-            );
-            tech4.setDepartment("Cardiology Department");
-            tech4.setShift("Day Shift (7 AM - 3 PM)");
-            tech4.setCertifications("CCT, ACLS");
-            technicians.add(tech4);
-            
-            System.out.println("✅ " + technicians.size() + " sample technicians added.");
-        }
-    }
-    
+  
     public void printAllTechnicians() {
         System.out.println("\n" + "=".repeat(80));
         System.out.println("TECHNICIAN DATABASE (" + technicians.size() + " technicians)");

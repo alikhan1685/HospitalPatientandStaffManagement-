@@ -41,21 +41,33 @@ public class AddTreatmentForm {
         title.setFont(new Font("Arial", 28));
         title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 10 0;");
         
-        // Create form grid
+        // Create form grid with proper column constraints
         GridPane form = new GridPane();
         form.setVgap(15);
         form.setHgap(20);
         form.setPadding(new Insets(25));
         form.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8; -fx-border-width: 1;");
         
-        // Initialize form fields
-        treatmentIdField = createTextField(200, "Auto-generated");
+        // Set column constraints for better layout
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPrefWidth(150); // Label column
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPrefWidth(250); // First input column
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setPrefWidth(150); // Label column
+        ColumnConstraints col4 = new ColumnConstraints();
+        col4.setPrefWidth(250); // Second input column
+        
+        form.getColumnConstraints().addAll(col1, col2, col3, col4);
+        
+        // Initialize form fields with visible widths
+        treatmentIdField = createTextField(250, "Auto-generated");
         treatmentIdField.setText("TREAT-" + System.currentTimeMillis());
         treatmentIdField.setEditable(false);
         treatmentIdField.setStyle("-fx-background-color: #ecf0f1; -fx-font-weight: bold;");
         
-        patientIdField = createTextField(200, "Enter patient ID (e.g., P1002024)");
-        patientNameField = createTextField(250, "Patient name (auto-filled)");
+        patientIdField = createTextField(150, "Enter patient ID (e.g., P1002024)");
+        patientNameField = createTextField(150, "Patient name (auto-filled)");
         patientNameField.setEditable(false);
         patientNameField.setStyle("-fx-background-color: #ecf0f1;");
         
@@ -74,7 +86,7 @@ public class AddTreatmentForm {
             "Nutrition Therapy"
         );
         treatmentTypeComboBox.setPromptText("Select treatment type");
-        treatmentTypeComboBox.setPrefWidth(250);
+        treatmentTypeComboBox.setPrefWidth(150);
         
         // Doctor ComboBox with refresh button
         doctorComboBox = new ComboBox<>();
@@ -91,18 +103,18 @@ public class AddTreatmentForm {
         // Date Picker
         startDatePicker = new DatePicker();
         startDatePicker.setValue(LocalDate.now());
-        startDatePicker.setPrefWidth(150);
+        startDatePicker.setPrefWidth(250);
         
         // Text Areas
         treatmentPlanArea = new TextArea();
         treatmentPlanArea.setPrefRowCount(4);
-        treatmentPlanArea.setPrefWidth(300);
+        treatmentPlanArea.setPrefWidth(530); // Spanning 2 columns minus gap
         treatmentPlanArea.setPromptText("Enter treatment plan details...");
         treatmentPlanArea.setWrapText(true);
         
         medicationsArea = new TextArea();
         medicationsArea.setPrefRowCount(3);
-        medicationsArea.setPrefWidth(300);
+        medicationsArea.setPrefWidth(530); // Spanning 2 columns minus gap
         medicationsArea.setPromptText("Enter medications (one per line)...");
         medicationsArea.setWrapText(true);
         
@@ -131,38 +143,17 @@ public class AddTreatmentForm {
             }
         });
         
-        // Add search button next to patient ID
-        Button searchPatientButton = new Button("🔍");
-        searchPatientButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
-        searchPatientButton.setOnAction(e -> {
-            String patientId = patientIdField.getText().trim();
-            if (!patientId.isEmpty()) {
-                String patientName = getPatientName(patientId);
-                patientNameField.setText(patientName);
-                
-                if (patientName.equals("Patient not found")) {
-                    showAlert("Patient Not Found", "No patient found with ID: " + patientId);
-                } else {
-                    // If patient is found, try to get their assigned doctor
-                    setDoctorFromPatient(patientId);
-                }
-            }
-        });        
-        
-        HBox patientIdContainer = new HBox(5);
-        patientIdContainer.getChildren().addAll(patientIdField, searchPatientButton);
-        
         // Add labels and fields to grid
         int row = 0;
         
         // Row 0: Treatment ID
         form.add(createLabel("Treatment ID:"), 0, row);
-        form.add(treatmentIdField, 1, row);
+        form.add(treatmentIdField, 1, row, 3, 1); // Span 3 columns
         row++;
         
         // Row 1: Patient Information
         form.add(createLabel("Patient ID:*"), 0, row);
-        form.add(patientIdContainer, 1, row);
+        form.add(patientIdField, 1, row);
         form.add(createLabel("Patient Name:"), 2, row);
         form.add(patientNameField, 3, row);
         row++;
@@ -176,26 +167,26 @@ public class AddTreatmentForm {
         
         // Row 3: Doctor
         form.add(createLabel("Attending Doctor:*"), 0, row);
-        form.add(doctorContainer, 1, row, 2, 1);
+        form.add(doctorContainer, 1, row, 3, 1); // Span 3 columns
         row++;
         
         // Row 4: Treatment Plan
         form.add(createLabel("Treatment Plan:*"), 0, row);
-        form.add(treatmentPlanArea, 1, row, 3, 1);
+        form.add(treatmentPlanArea, 1, row, 3, 1); // Span 3 columns
         row++;
         
         // Row 5: Medications
         form.add(createLabel("Medications:"), 0, row);
-        form.add(medicationsArea, 1, row, 3, 1);
+        form.add(medicationsArea, 1, row, 3, 1); // Span 3 columns
         row++;
         
         // Row 6: Duration and Frequency
         form.add(createLabel("Duration:"), 0, row);
-        TextField durationField = createTextField(100, "e.g., 2 weeks, 1 month");
+        TextField durationField = createTextField(250, "e.g., 2 weeks, 1 month");
         form.add(durationField, 1, row);
         
         form.add(createLabel("Frequency:"), 2, row);
-        TextField frequencyField = createTextField(100, "e.g., Daily, Weekly");
+        TextField frequencyField = createTextField(250, "e.g., Daily, Weekly");
         form.add(frequencyField, 3, row);
         row++;
         

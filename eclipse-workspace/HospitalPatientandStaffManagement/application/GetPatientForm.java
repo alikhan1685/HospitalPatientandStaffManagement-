@@ -1,5 +1,4 @@
 package application;
-
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
@@ -12,7 +11,6 @@ import javafx.collections.ObservableList;
 import java.util.List;
 
 public class GetPatientForm {
-   
     private VBox container;
     private TableView<Patients> patientTable;
     private ObservableList<Patients> patientData;
@@ -43,17 +41,19 @@ public class GetPatientForm {
         searchTypeComboBox = new ComboBox<>();
         searchTypeComboBox.getItems().addAll("Search by ID", "Search by Name", "View All Patients");
         searchTypeComboBox.setValue("View All Patients");
-        searchTypeComboBox.setPrefWidth(150);
+        searchTypeComboBox.setPrefWidth(80);
         
         searchField = new TextField();
-        searchField.setPromptText("Enter search term...");
-        searchField.setPrefWidth(250);
+        searchField.setPromptText("Enter search term");
+        searchField.setPrefWidth(200);
         
+        // Search button with UTF-8 search icon
         Button searchButton = new Button("Search");
         searchButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;");
         searchButton.setOnAction(e -> searchPatients());
         
-        Button refreshButton = new Button("Refresh List");
+        // Refresh button with UTF-8 refresh icon
+        Button refreshButton = new Button("Refresh");
         refreshButton.setStyle("-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;");
         refreshButton.setOnAction(e -> refreshPatientList());
         

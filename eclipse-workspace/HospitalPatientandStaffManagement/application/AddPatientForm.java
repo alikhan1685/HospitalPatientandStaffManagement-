@@ -6,7 +6,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import java.util.List;
-
 public class AddPatientForm {
     private VBox formContainer;
     private TextField nameField;
@@ -20,13 +19,11 @@ public class AddPatientForm {
     private TextField emergencyContactField;
     private TextField bloodGroupField;
     private Button refreshDoctorsButton;
-  
     public AddPatientForm() {
         initializeForm();
     }
-   
     private void initializeForm() {
-        // Create form container
+        // Create form container 
         formContainer = new VBox();
         formContainer.setSpacing(20);
         formContainer.setPadding(new Insets(20));
@@ -54,7 +51,7 @@ public class AddPatientForm {
         
         // Gender ComboBox
         genderComboBox = new ComboBox<>();
-        genderComboBox.getItems().addAll("Male", "Female", "Other", "Prefer not to say");
+        genderComboBox.getItems().addAll("Male", "Female");
         genderComboBox.setPromptText("Select gender");
         genderComboBox.setPrefWidth(200);
         
@@ -81,25 +78,25 @@ public class AddPatientForm {
         
         // Add labels and fields to grid
         int row = 0;
-        form.add(createLabel("Full Name:*"), 0, row);
+        form.add(createLabel("Full Name:"), 0, row);
         form.add(nameField, 1, row++);
         
-        form.add(createLabel("Age:*"), 0, row);
+        form.add(createLabel("Age:"), 0, row);
         form.add(ageField, 1, row++);
         
-        form.add(createLabel("Gender:*"), 0, row);
+        form.add(createLabel("Gender:"), 0, row);
         form.add(genderComboBox, 1, row++);
         
-        form.add(createLabel("Address:*"), 0, row);
+        form.add(createLabel("Address:"), 0, row);
         form.add(addressField, 1, row++);
         
-        form.add(createLabel("Phone:*"), 0, row);
+        form.add(createLabel("Phone:"), 0, row);
         form.add(phoneField, 1, row++);
         
         form.add(createLabel("Blood Group:"), 0, row);
         form.add(bloodGroupField, 1, row++);
         
-        form.add(createLabel("Assign Doctor:*"), 0, row);
+        form.add(createLabel("Assign Doctor:"), 0, row);
         form.add(doctorSelectionBox, 1, row++);
         
         form.add(createLabel("Medical History:"), 0, row);

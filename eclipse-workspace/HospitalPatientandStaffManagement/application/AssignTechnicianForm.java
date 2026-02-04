@@ -13,9 +13,11 @@ public class AssignTechnicianForm {
     private TextField patientNameField;
     private ComboBox<String> technicianComboBox;
     private Button refreshButton;
+    private TechnicianDatabase technicianDatabase;
     private Map<String, List<String>> technicianAssignments; // Track technician-patient assignments
     
     public AssignTechnicianForm() {
+        technicianDatabase = TechnicianDatabase.getInstance();
         technicianAssignments = new HashMap<>();
         initializeForm();
     }
@@ -97,7 +99,7 @@ public class AssignTechnicianForm {
         int row = 0;
         
         // Patient Information
-        form.add(createLabel("Patient ID:*"), 0, row);
+        form.add(createLabel("Patient ID:"), 0, row);
         form.add(patientIdContainer, 1, row);
         row++;
         
@@ -105,7 +107,7 @@ public class AssignTechnicianForm {
         form.add(patientNameField, 1, row);
         row++;
         
-        form.add(createLabel("Assign Technician:*"), 0, row);
+        form.add(createLabel("Assign Technician:"), 0, row);
         form.add(technicianContainer, 1, row);
         row++;
         
@@ -145,7 +147,7 @@ public class AssignTechnicianForm {
             validationLabel.setText("");
         });
         
-        // View assignments button - CHANGED TO SHOW ASSIGNMENTS
+        // View assignments button
         Button viewAssignmentsButton = new Button("View Assignments");
         viewAssignmentsButton.setStyle("-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         viewAssignmentsButton.setOnAction(e -> showAllAssignments());
@@ -160,35 +162,34 @@ public class AssignTechnicianForm {
         updateTechnicianComboBox();
     }
     
-    // Method to update technician combobox with available technicians
+    // Method to update technician combobox with available technicians FROM DATABASE
     private void updateTechnicianComboBox() {
         technicianComboBox.getItems().clear();
         
-        // Get available technicians
-        List<String> technicians = getAvailableTechnicians();
+        // Get available technicians from database
+        List<Technicians> availableTechnicians = technicianDatabase.getAvailableTechnicians();
         
-        if (technicians.isEmpty()) {
+        if (availableTechnicians.isEmpty()) {
             technicianComboBox.getItems().add("No available technicians");
             technicianComboBox.setValue("No available technicians");
             technicianComboBox.setPromptText("No technicians available");
         } else {
-            technicianComboBox.getItems().addAll(technicians);
+            for (Technicians technician : availableTechnicians) {
+                // Format: "Technician Name (Department/Specialization) - ID: TECH-001"
+                String displayText = String.format("%s (%s) - ID: %s", 
+                    technician.getName(),
+                    technician.getSpecialization() != null && !technician.getSpecialization().isEmpty() 
+                        ? technician.getSpecialization() 
+                        : technician.getDepartment(),
+                    technician.getId()
+                );
+                technicianComboBox.getItems().add(displayText);
+            }
             technicianComboBox.setPromptText("Select technician to assign");
             
             // Sort alphabetically
             technicianComboBox.getItems().sort(String::compareTo);
         }
-    }
-    
-    // Method to get available technicians
-    private List<String> getAvailableTechnicians() {
-        return List.of(
-            "Alex Johnson (Lab Technician) - ID: TECH-001",
-            "Sarah Williams (X-Ray Technician) - ID: TECH-002",
-            "Michael Brown (MRI Technician) - ID: TECH-003",
-            "Emily Davis (Ultrasound Technician) - ID: TECH-004",
-            "David Wilson (Cardiology Technician) - ID: TECH-005"
-        );
     }
     
     // Method to get patient name
@@ -241,7 +242,7 @@ public class AssignTechnicianForm {
         return displayText;
     }
     
-    // Helper method to extract technician specialization from combobox selection
+    // Helper method to extract technician specialization/department from combobox selection
     private String extractTechnicianSpecialization(String displayText) {
         if (displayText == null || displayText.equals("No available technicians")) {
             return null;
@@ -283,11 +284,6 @@ public class AssignTechnicianForm {
         return total;
     }
     
-    // Get assignments for a specific technician
-    private List<String> getTechnicianAssignments(String technicianId) {
-        return technicianAssignments.getOrDefault(technicianId, new ArrayList<>());
-    }
-    
     // MAIN METHOD: Assign technician to patient
     private boolean assignTechnicianToPatient(Label validationLabel) {
         // Validate patient
@@ -319,24 +315,40 @@ public class AssignTechnicianForm {
                 return false;
             }
             
-            // Track the assignment
-            trackTechnicianAssignment(technicianId, technicianName, patientId, patientName);
+            // Get technician object from database
+            Technicians technician = technicianDatabase.getTechnicianById(technicianId);
+            if (technician == null) {
+                validationLabel.setText("Technician not found in database.");
+                return false;
+            }
             
-            // Display success message
-            System.out.println("\n" + "=".repeat(60));
-            System.out.println("TECHNICIAN ASSIGNED SUCCESSFULLY");
-            System.out.println("=".repeat(60));
-            System.out.println("Patient ID: " + patientId);
-            System.out.println("Patient Name: " + patientName);
-            System.out.println("Technician ID: " + technicianId);
-            System.out.println("Technician Name: " + technicianName);
-            System.out.println("Specialization: " + specialization);
-            System.out.println("Assignment Date: " + LocalDate.now());
-            System.out.println("Status: Active");
-            System.out.println("Total Assignments: " + getTotalAssignments());
-            System.out.println("=".repeat(60));
+            // Assign technician to patient using the database method
+            boolean assignmentSuccess = technicianDatabase.assignTechnicianToPatient(technicianId, patientId);
             
-            return true;
+            if (assignmentSuccess) {
+                // Track the assignment locally
+                trackTechnicianAssignment(technicianId, technicianName, patientId, patientName);
+                
+                // Display success message
+                System.out.println("\n" + "=".repeat(60));
+                System.out.println("TECHNICIAN ASSIGNED SUCCESSFULLY");
+                System.out.println("=".repeat(60));
+                System.out.println("Patient ID: " + patientId);
+                System.out.println("Patient Name: " + patientName);
+                System.out.println("Technician ID: " + technicianId);
+                System.out.println("Technician Name: " + technicianName);
+                System.out.println("Specialization/Department: " + specialization);
+                System.out.println("Assignment Date: " + LocalDate.now());
+                System.out.println("Status: " + technician.getStatus());
+                System.out.println("Current Patients: " + technician.getCurrentPatientsCount() + "/" + technician.getMaxPatients());
+                System.out.println("Total Assignments: " + getTotalAssignments());
+                System.out.println("=".repeat(60));
+                
+                return true;
+            } else {
+                validationLabel.setText("Failed to assign technician. The technician might be at capacity.");
+                return false;
+            }
             
         } catch (Exception e) {
             validationLabel.setText("An error occurred: " + e.getMessage());
@@ -360,11 +372,11 @@ public class AssignTechnicianForm {
                 "Technician", "Specialization", "Patient ID", "Patient Name"));
             assignmentsInfo.append("-".repeat(80)).append("\n");
             
-            // Parse all technicians to show their assignments
-            for (String techDisplay : getAvailableTechnicians()) {
-                String techId = extractTechnicianId(techDisplay);
-                String techName = extractTechnicianName(techDisplay);
-                String specialization = extractTechnicianSpecialization(techDisplay);
+            // Get all technicians from database
+            List<Technicians> allTechnicians = technicianDatabase.getAllTechnicians();
+            
+            for (Technicians technician : allTechnicians) {
+                String techId = technician.getId();
                 
                 if (technicianAssignments.containsKey(techId)) {
                     List<String> assignments = technicianAssignments.get(techId);
@@ -376,8 +388,10 @@ public class AssignTechnicianForm {
                         String patientId = patientInfo.split("ID: ")[1].replace(")", "");
                         
                         assignmentsInfo.append(String.format("%-30s | %-20s | %-15s | %s\n",
-                            techName,
-                            specialization,
+                            technician.getName(),
+                            technician.getSpecialization() != null && !technician.getSpecialization().isEmpty() 
+                                ? technician.getSpecialization() 
+                                : technician.getDepartment(),
                             patientId,
                             patientName
                         ));
@@ -388,6 +402,8 @@ public class AssignTechnicianForm {
         
         assignmentsInfo.append("\n📊 SUMMARY:\n");
         assignmentsInfo.append("Total Assignments: ").append(totalAssignments).append("\n");
+        assignmentsInfo.append("Total Technicians in System: ").append(technicianDatabase.getTechnicianCount()).append("\n");
+        assignmentsInfo.append("Available Technicians: ").append(technicianDatabase.getAvailableTechnicianCount()).append("\n");
         assignmentsInfo.append("Technicians with Assignments: ").append(technicianAssignments.size()).append("\n");
         
         // Calculate assignments per technician
@@ -395,15 +411,8 @@ public class AssignTechnicianForm {
             assignmentsInfo.append("\n📈 Assignments per Technician:\n");
             for (Map.Entry<String, List<String>> entry : technicianAssignments.entrySet()) {
                 String techId = entry.getKey();
-                String techName = "Unknown";
-                
-                // Find technician name by ID
-                for (String techDisplay : getAvailableTechnicians()) {
-                    if (extractTechnicianId(techDisplay).equals(techId)) {
-                        techName = extractTechnicianName(techDisplay);
-                        break;
-                    }
-                }
+                Technicians technician = technicianDatabase.getTechnicianById(techId);
+                String techName = technician != null ? technician.getName() : "Unknown";
                 
                 assignmentsInfo.append("  ").append(techName)
                               .append(": ").append(entry.getValue().size())
@@ -441,6 +450,8 @@ public class AssignTechnicianForm {
         String technicianName = extractTechnicianName(selectedTechnician);
         String patientName = patientNameField.getText();
         int totalAssignments = getTotalAssignments();
+        int totalTechnicians = technicianDatabase.getTechnicianCount();
+        int availableTechnicians = technicianDatabase.getAvailableTechnicianCount();
         
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
@@ -453,12 +464,16 @@ public class AssignTechnicianForm {
             "Date: %s\n\n" +
             "📊 Database Status:\n" +
             "Total Assignments: %d\n" +
+            "Total Technicians: %d\n" +
+            "Available Technicians: %d\n" +
             "Technicians with Assignments: %d\n\n" +
             "✅ Assignment has been recorded in the system.",
             patientName,
             technicianName,
             LocalDate.now(),
             totalAssignments,
+            totalTechnicians,
+            availableTechnicians,
             technicianAssignments.size()
         );
         
