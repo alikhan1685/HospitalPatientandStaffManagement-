@@ -217,7 +217,7 @@ public class MainMenu extends Application {
             DatabaseOfDoctorForm availableDoctors = new DatabaseOfDoctorForm();
             showContent(availableDoctors.getForm());
         });
-        
+       
         assignDoctor.setOnMouseClicked(e -> {
             AssignDoctorForm assignDoctorForm = new AssignDoctorForm();
             showContent(assignDoctorForm.getForm());

@@ -163,7 +163,7 @@ public class DataBaseOfTechnicianForm {
         // Show summary statistics
         int totalTechnicians = TechnicianDatabase.getInstance().getTechnicianCount();
         int availableTechnicians = TechnicianDatabase.getInstance().getAvailableTechnicianCount();
-        
+       
         System.out.println("\n" + "=".repeat(50));
         System.out.println("TECHNICIAN DATABASE REFRESHED");
         System.out.println("=".repeat(50));

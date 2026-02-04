@@ -5,16 +5,16 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import java.util.List;
+import java.time.LocalDate;
 
 public class AssignNurseForm {
     private VBox formContainer;
     private TextField patientIdField;
     private TextField patientNameField;
-    private TextField nurseIdField;
-    private TextField nurseNameField;
     private ComboBox<String> nurseComboBox;
-    private TextArea assignmentDetailsArea;
-    private NurseDatabase nurseDatabase;  
+    private NurseDatabase nurseDatabase;
+    private Button refreshButton;
+    
     public AssignNurseForm() {
         nurseDatabase = NurseDatabase.getInstance();
         initializeForm();
@@ -29,7 +29,7 @@ public class AssignNurseForm {
         // Title
         Label title = new Label("Assign Nurse to Patient");
         title.setFont(new Font("Arial", 28));
-        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 10 0;");
         
         // Create form grid
         GridPane form = new GridPane();
@@ -38,142 +38,80 @@ public class AssignNurseForm {
         form.setPadding(new Insets(25));
         form.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8; -fx-border-width: 1;");
         
-        // Patient Information section
-        Label patientSection = new Label("PATIENT INFORMATION");
-        patientSection.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50; -fx-padding: 0 0 10 0;");
-        form.add(patientSection, 0, 0, 4, 1);
-        
-        int row = 1;
-        
-        // Patient ID field
-        form.add(createLabel("Patient ID:*"), 0, row);
-        patientIdField = createTextField(150, "Enter patient ID");
-        form.add(patientIdField, 1, row);
-        
-        Button searchPatientButton = new Button("🔍 Search Patient");
-        searchPatientButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 5 10;");
-        searchPatientButton.setOnAction(e -> searchPatient());
-        
-        HBox patientIdBox = new HBox(5);
-        patientIdBox.getChildren().addAll(patientIdField, searchPatientButton);
-        form.add(patientIdBox, 1, row, 3, 1);
-        row++;
-        
-        form.add(createLabel("Patient Name:"), 0, row);
+        // Initialize form fields
+        patientIdField = createTextField(200, "Enter patient ID");
         patientNameField = createTextField(250, "Patient name (auto-filled)");
         patientNameField.setEditable(false);
         patientNameField.setStyle("-fx-background-color: #ecf0f1;");
-        form.add(patientNameField, 1, row, 3, 1);
-        row++;
         
-        // Add some spacing
-        form.add(new Label(""), 0, row);
-        row++;
-        
-        // Nurse Information section
-        Label nurseSection = new Label("NURSE INFORMATION");
-        nurseSection.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50; -fx-padding: 10 0 10 0;");
-        form.add(nurseSection, 0, row, 4, 1);
-        row++;
-        
-        // Nurse ID and Name fields
-        form.add(createLabel("Nurse ID:*"), 0, row);
-        nurseIdField = createTextField(150, "Nurse ID (auto-filled)");
-        nurseIdField.setEditable(false);
-        nurseIdField.setStyle("-fx-background-color: #ecf0f1;");
-        form.add(nurseIdField, 1, row);
-        
-        form.add(createLabel("Nurse Name:"), 2, row);
-        nurseNameField = createTextField(250, "Nurse name (auto-filled)");
-        nurseNameField.setEditable(false);
-        nurseNameField.setStyle("-fx-background-color: #ecf0f1;");
-        form.add(nurseNameField, 3, row);
-        row++;
-        
-        // Nurse selection ComboBox
-        form.add(createLabel("Select Nurse:*"), 0, row);
+        // Nurse ComboBox with refresh button
         nurseComboBox = new ComboBox<>();
-        updateNurseComboBox();
-        nurseComboBox.setPromptText("Select a nurse");
-        nurseComboBox.setPrefWidth(400);
-        nurseComboBox.setOnAction(e -> {
-            String selected = nurseComboBox.getValue();
-            if (selected != null && !selected.isEmpty() && !selected.contains("No available")) {
-                // Extract nurse ID and name from selection
-                String[] parts = selected.split(" - ");
-                if (parts.length >= 2) {
-                    nurseIdField.setText(parts[0].trim());
-                    
-                    // Extract name from display text
-                    String namePart = parts[1].split(" \\| ")[0];
-                    nurseNameField.setText(namePart.trim());
-                    
-                    // Set background color to indicate selection
-                    nurseIdField.setStyle("-fx-background-color: #d4edda;");
-                    nurseNameField.setStyle("-fx-background-color: #d4edda;");
+        nurseComboBox.setPrefWidth(300);
+        
+        refreshButton = new Button("🔄");
+        refreshButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+        refreshButton.setTooltip(new Tooltip("Refresh nurses list"));
+        refreshButton.setOnAction(e -> updateNurseComboBox());
+        
+        HBox nurseContainer = new HBox(10);
+        nurseContainer.getChildren().addAll(nurseComboBox, refreshButton);
+        
+        // Add event listener for patient ID field
+        patientIdField.setOnKeyReleased(e -> {
+            String patientId = patientIdField.getText().trim();
+            if (!patientId.isEmpty()) {
+                String patientName = getPatientName(patientId);
+                patientNameField.setText(patientName);
+                
+                // Change background color
+                if (patientName.equals("Patient not found")) {
+                    patientNameField.setStyle("-fx-background-color: #ffcccc;");
+                } else {
+                    patientNameField.setStyle("-fx-background-color: #d4edda;");
+                }
+            } else {
+                patientNameField.clear();
+                patientNameField.setStyle("-fx-background-color: #ecf0f1;");
+            }
+        });
+        
+        // Add search button next to patient ID
+        Button searchPatientButton = new Button("🔍");
+        searchPatientButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        searchPatientButton.setOnAction(e -> {
+            String patientId = patientIdField.getText().trim();
+            if (!patientId.isEmpty()) {
+                String patientName = getPatientName(patientId);
+                patientNameField.setText(patientName);
+                
+                if (patientName.equals("Patient not found")) {
+                    showAlert("Patient Not Found", "No patient found with ID: " + patientId);
                 }
             }
         });
         
-        HBox nurseSelectionBox = new HBox(10);
-        nurseSelectionBox.getChildren().addAll(nurseComboBox);
-        form.add(nurseSelectionBox, 1, row, 3, 1);
+        HBox patientIdContainer = new HBox(5);
+        patientIdContainer.getChildren().addAll(patientIdField, searchPatientButton);
+        
+        // Add labels and fields to grid
+        int row = 0;
+        
+        // Patient Information
+        form.add(createLabel("Patient ID:*"), 0, row);
+        form.add(patientIdContainer, 1, row);
         row++;
         
-        // Show available nurses button
-        Button showAvailableNursesButton = new Button("📋 View Available Nurses List");
-        showAvailableNursesButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;");
-        showAvailableNursesButton.setOnAction(e -> showAvailableNurses());
-        form.add(showAvailableNursesButton, 1, row, 3, 1);
+        form.add(createLabel("Patient Name:"), 0, row);
+        form.add(patientNameField, 1, row);
         row++;
         
-        // Add some spacing
-        form.add(new Label(""), 0, row);
+        form.add(createLabel("Assign Nurse:*"), 0, row);
+        form.add(nurseContainer, 1, row);
         row++;
         
-        // Assignment Details section
-        Label assignmentSection = new Label("ASSIGNMENT DETAILS");
-        assignmentSection.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50; -fx-padding: 10 0 10 0;");
-        form.add(assignmentSection, 0, row, 4, 1);
-        row++;
-        
-        // Assignment details area
-        form.add(createLabel("Assignment Details:*"), 0, row);
-        assignmentDetailsArea = new TextArea();
-        assignmentDetailsArea.setPrefRowCount(4);
-        assignmentDetailsArea.setPrefWidth(400);
-        assignmentDetailsArea.setPromptText("Enter assignment details (reason, duration, special instructions)...");
-        assignmentDetailsArea.setWrapText(true);
-        form.add(assignmentDetailsArea, 1, row, 3, 1);
-        row++;
-        
-        // Duration and Priority
-        form.add(createLabel("Duration:*"), 0, row);
-        ComboBox<String> durationComboBox = new ComboBox<>();
-        durationComboBox.getItems().addAll(
-            "1 day",
-            "3 days", 
-            "1 week",
-            "2 weeks",
-            "1 month",
-            "Until discharge",
-            "Continuous care"
-        );
-        durationComboBox.setValue("1 week");
-        durationComboBox.setPrefWidth(150);
-        form.add(durationComboBox, 1, row);
-        
-        form.add(createLabel("Priority:*"), 2, row);
-        ComboBox<String> priorityComboBox = new ComboBox<>();
-        priorityComboBox.getItems().addAll("Normal", "High", "Emergency", "Critical");
-        priorityComboBox.setValue("Normal");
-        priorityComboBox.setPrefWidth(150);
-        form.add(priorityComboBox, 3, row);
-        row++;
-        
-        // Assignment date (auto-generated)
+        // Assignment Date
         form.add(createLabel("Assignment Date:"), 0, row);
-        TextField dateField = createTextField(150, java.time.LocalDate.now().toString());
+        TextField dateField = createTextField(150, LocalDate.now().toString());
         dateField.setEditable(false);
         dateField.setStyle("-fx-background-color: #ecf0f1;");
         form.add(dateField, 1, row);
@@ -182,18 +120,20 @@ public class AssignNurseForm {
         // Form validation message
         Label validationLabel = new Label();
         validationLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 12px;");
-        form.add(validationLabel, 1, row, 3, 1);
+        form.add(validationLabel, 1, row);
+        row++;
         
         // Button container
         HBox buttonContainer = new HBox(15);
         buttonContainer.setPadding(new Insets(20, 0, 0, 0));
         
-        // Assign button
-        Button assignButton = new Button("👩‍⚕️ Assign Nurse");
+        // Assign button - MAIN BUTTON
+        Button assignButton = new Button("Assign Nurse");
         assignButton.setStyle("-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         assignButton.setOnAction(e -> {
-            if (assignNurseToPatient(durationComboBox, priorityComboBox, dateField, validationLabel)) {
+            if (assignNurseToPatient(validationLabel)) {
                 showSuccessAlert();
+                updateNurseComboBox(); // Refresh the list after assignment
             }
         });
         
@@ -205,268 +145,257 @@ public class AssignNurseForm {
             validationLabel.setText("");
         });
         
-        // View all assignments button
-        Button viewAssignmentsButton = new Button("View All Assignments");
+        // View assignments button
+        Button viewAssignmentsButton = new Button("View Assignments");
         viewAssignmentsButton.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5;");
         viewAssignmentsButton.setOnAction(e -> showAllAssignments());
         
         buttonContainer.getChildren().addAll(assignButton, clearButton, viewAssignmentsButton);
-        formContainer.getChildren().addAll(title, form, buttonContainer);
+        form.add(buttonContainer, 0, row, 2, 1);
+        
+        // Add components to container
+        formContainer.getChildren().addAll(title, form);
+        
+        // Initialize the nurse combobox
+        updateNurseComboBox();
     }
     
+    // Method to update nurse combobox with available nurses
     private void updateNurseComboBox() {
         nurseComboBox.getItems().clear();
+        
         List<Nurses> availableNurses = nurseDatabase.getAvailableNurses();
         
-        for (Nurses nurse : availableNurses) {
-            // Use getId() method to get nurse ID
-            String displayText = String.format("%s - %s | Department: %s | Patients: %d/%d | Shift: %s | Status: %s",
-                nurse.getId(),  // This should work if Nurses class has getId() method
-                nurse.getName(),
-                nurse.getDepartment(),
-                nurse.getCurrentPatientsCount(),
-                nurse.getMaxPatients(),
-                nurse.getShift(),
-                nurse.getStatus()
-            );
-            nurseComboBox.getItems().add(displayText);
-        }
-        
         if (availableNurses.isEmpty()) {
-            nurseComboBox.getItems().add("No available nurses - all at capacity");
-            nurseComboBox.setDisable(true);
+            nurseComboBox.getItems().add("No available nurses");
+            nurseComboBox.setValue("No available nurses");
+            nurseComboBox.setPromptText("No nurses available");
         } else {
-            nurseComboBox.setDisable(false);
-        }
-        
-        // Clear ID and name fields
-        nurseIdField.clear();
-        nurseNameField.clear();
-        nurseIdField.setStyle("-fx-background-color: #ecf0f1;");
-        nurseNameField.setStyle("-fx-background-color: #ecf0f1;");
-    }
-    
-    private void searchPatient() {
-        String patientId = patientIdField.getText().trim();
-        if (!patientId.isEmpty()) {
-            // Search patient in database
-            PatientDatabase patientDb = PatientDatabase.getInstance();
-            List<Patients> patients = patientDb.searchById(patientId);
-            
-            if (!patients.isEmpty()) {
-                Patients patient = patients.get(0);
-                patientNameField.setText(patient.getName());
-                patientNameField.setStyle("-fx-background-color: #d4edda;"); // Green background
-                
-                // Show patient info
-                System.out.println("Found patient: " + patient.getName() + " (ID: " + patient.getId() + ")");
-            } else {
-                patientNameField.setText("Patient not found");
-                patientNameField.setStyle("-fx-background-color: #ffcccc;"); // Red background
-            }
-        }
-    }
-  
-    private void showAvailableNurses() {
-        List<Nurses> availableNurses = nurseDatabase.getAvailableNurses();
-        
-        StringBuilder nursesInfo = new StringBuilder();
-        nursesInfo.append("AVAILABLE NURSES FOR ASSIGNMENT\n");
-        nursesInfo.append("=".repeat(80)).append("\n\n");
-        
-        if (availableNurses.isEmpty()) {
-            nursesInfo.append("No nurses currently available. All nurses are at capacity.\n");
-        } else {
-            nursesInfo.append(String.format("%-8s | %-20s | %-15s | %-12s | %-15s | %s\n",
-                "ID", "Name", "Department", "Patients", "Shift", "Status"));
-            nursesInfo.append("-".repeat(80)).append("\n");
-           
             for (Nurses nurse : availableNurses) {
-                nursesInfo.append(String.format("%-8s | %-20s | %-15s | %3d/%-8d | %-15s | %s\n",
-                    nurse.getId(),  // Use getId() method
+                // Format: "Nurse Name (Department) - ID: NUR-001"
+                String displayText = String.format("%s (%s) - ID: %s", 
                     nurse.getName(),
                     nurse.getDepartment(),
-                    nurse.getCurrentPatientsCount(),
-                    nurse.getMaxPatients(),
-                    getShiftAbbreviation(nurse.getShift()),
-                    nurse.getStatus()
-                ));
+                    nurse.getId()
+                );
+                nurseComboBox.getItems().add(displayText);
             }
+            nurseComboBox.setPromptText("Select nurse to assign");
+            
+            // Sort alphabetically
+            nurseComboBox.getItems().sort(String::compareTo);
+        }
+    }
+    
+    // Method to get patient name
+    private String getPatientName(String patientId) {
+        PatientDatabase patientDatabase = PatientDatabase.getInstance();
+        List<Patients> patients = patientDatabase.searchById(patientId);
+        
+        if (!patients.isEmpty()) {
+            Patients patient = patients.get(0);
+            System.out.println("Patient found: " + patient.getName() + " (ID: " + patient.getId() + ")");
+            return patient.getName();
+        } else {
+            return "Patient not found";
+        }
+    }
+    
+    // Helper method to extract nurse ID from combobox selection
+    private String extractNurseId(String displayText) {
+        if (displayText == null || displayText.equals("No available nurses")) {
+            return null;
         }
         
-        nursesInfo.append("\nTotal available nurses: ").append(availableNurses.size());
-        nursesInfo.append("\nTotal nurses in system: ").append(nurseDatabase.getNurseCount());
-        
-        // Show in a dialog with text area for better formatting
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Available Nurses");
-        alert.setHeaderText("Nurses Available for Assignment");
-        
-        TextArea textArea = new TextArea(nursesInfo.toString());
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-        textArea.setPrefRowCount(15);
-        textArea.setPrefColumnCount(80);
-        textArea.setStyle("-fx-font-family: 'Monospaced'; -fx-font-size: 12px;");
-        
-        alert.getDialogPane().setContent(textArea);
-        alert.getDialogPane().setPrefSize(800, 500);
-        alert.showAndWait();
+        try {
+            // Format: "Nurse Name (Department) - ID: NUR-001"
+            if (displayText.contains("ID: ")) {
+                String[] parts = displayText.split("ID: ");
+                if (parts.length > 1) {
+                    return parts[1].trim();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
-    private String getShiftAbbreviation(String fullShift) {
-        if (fullShift.contains("Day")) return "Day";
-        if (fullShift.contains("Evening")) return "Evening";
-        if (fullShift.contains("Night")) return "Night";
-        if (fullShift.contains("Morning")) return "Morning";
-        return fullShift.length() > 10 ? fullShift.substring(0, 10) + "..." : fullShift;
+    // Helper method to extract nurse name from combobox selection
+    private String extractNurseName(String displayText) {
+        if (displayText == null || displayText.equals("No available nurses")) {
+            return null;
+        }
+        
+        try {
+            // Format: "Nurse Name (Department) - ID: NUR-001"
+            String[] parts = displayText.split(" \\(");
+            if (parts.length > 0) {
+                return parts[0].trim();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return displayText;
     }
     
-    private boolean assignNurseToPatient(ComboBox<String> durationComboBox, 
-                                        ComboBox<String> priorityComboBox,
-                                        TextField dateField,
-                                        Label validationLabel) {
+    // Helper method to extract nurse department from combobox selection
+    private String extractNurseDepartment(String displayText) {
+        if (displayText == null || displayText.equals("No available nurses")) {
+            return null;
+        }
+        
+        try {
+            // Format: "Nurse Name (Department) - ID: NUR-001"
+            String[] parts = displayText.split(" \\(");
+            if (parts.length > 1) {
+                // Remove the ")" and everything after
+                String departmentPart = parts[1];
+                if (departmentPart.contains(") - ID: ")) {
+                    return departmentPart.split("\\) - ID: ")[0].trim();
+                }
+                return departmentPart.replace(")", "").trim();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    // MAIN METHOD: Assign nurse to patient
+    private boolean assignNurseToPatient(Label validationLabel) {
         // Validate patient
         String patientId = patientIdField.getText().trim();
-        if (patientId.isEmpty() || patientNameField.getText().equals("Patient not found")) {
-            validationLabel.setText("Please enter a valid patient ID");
+        String patientName = patientNameField.getText();
+        
+        if (patientName.equals("Patient not found") || patientName.isEmpty()) {
+            validationLabel.setText("Error: Patient not found. Please enter a valid Patient ID.");
+            patientIdField.setStyle("-fx-border-color: #ff0000; -fx-border-width: 2px;");
             return false;
         }
         
         // Validate nurse selection
         String selectedNurse = nurseComboBox.getValue();
-        if (selectedNurse == null || selectedNurse.isEmpty() || 
-            selectedNurse.contains("No available nurses")) {
-            validationLabel.setText("Please select an available nurse");
-            return false;
-        }
-        
-        // Validate nurse ID
-        String nurseId = nurseIdField.getText().trim();
-        if (nurseId.isEmpty()) {
-            validationLabel.setText("Please select a nurse from the list");
+        if (selectedNurse == null || selectedNurse.equals("No available nurses")) {
+            validationLabel.setText("Please select an available nurse.");
+            nurseComboBox.setStyle("-fx-border-color: #ff0000; -fx-border-width: 2px;");
             return false;
         }
         
         try {
-            String assignmentDetails = assignmentDetailsArea.getText().trim();
-            if (assignmentDetails.isEmpty()) {
-                validationLabel.setText("Please enter assignment details");
+            // Extract nurse information
+            String nurseId = extractNurseId(selectedNurse);
+            String nurseName = extractNurseName(selectedNurse);
+            String department = extractNurseDepartment(selectedNurse);
+            
+            if (nurseId == null || nurseName == null) {
+                validationLabel.setText("Invalid nurse selection.");
                 return false;
             }
             
-            String duration = durationComboBox.getValue();
-            String priority = priorityComboBox.getValue();
-            String assignmentDate = dateField.getText();
-            
-            // Get the nurse object by searching through all nurses
-            Nurses assignedNurse = null;
-            List<Nurses> allNurses = nurseDatabase.getAllNurses();
-            for (Nurses nurse : allNurses) {
-                // Use getId() method to compare IDs
-                if (nurse.getId().equalsIgnoreCase(nurseId)) {
-                    assignedNurse = nurse;
-                    break;
-                }
+            // Get the nurse object
+            Nurses nurse = findNurseById(nurseId);
+            if (nurse == null) {
+                validationLabel.setText("Nurse not found in database.");
+                return false;
             }
             
             // Assign nurse to patient
-            if (nurseDatabase.assignNurseToPatient(nurseId, patientId)) {
-                // Log assignment
-                System.out.println("\n" + "=".repeat(80));
-                System.out.println("NURSE ASSIGNMENT RECORD");
-                System.out.println("=".repeat(80));
-                System.out.println("ASSIGNMENT DETAILS:");
-                System.out.println("  Patient ID: " + patientId);
-                System.out.println("  Patient Name: " + patientNameField.getText());
-                System.out.println("  Nurse ID: " + nurseId);
-                System.out.println("  Nurse Name: " + nurseNameField.getText());
-                System.out.println("  Duration: " + duration);
-                System.out.println("  Priority: " + priority);
-                System.out.println("  Assignment Date: " + assignmentDate);
-                System.out.println("  Assignment Details: " + assignmentDetails);
+            boolean assignmentSuccess = nurseDatabase.assignNurseToPatient(nurseId, patientId);
+            
+            if (assignmentSuccess) {
+                // Display success message
+                System.out.println("\n" + "=".repeat(60));
+                System.out.println("NURSE ASSIGNED SUCCESSFULLY");
+                System.out.println("=".repeat(60));
+                System.out.println("Patient ID: " + patientId);
+                System.out.println("Patient Name: " + patientName);
+                System.out.println("Nurse ID: " + nurseId);
+                System.out.println("Nurse Name: " + nurseName);
+                System.out.println("Department: " + department);
+                System.out.println("Assignment Date: " + LocalDate.now());
+                System.out.println("Current Patients: " + nurse.getCurrentPatientsCount() + "/" + nurse.getMaxPatients());
+                System.out.println("Status: Active");
+                System.out.println("=".repeat(60));
                 
-                // Get nurse details for logging
-                if (assignedNurse != null) {
-                    System.out.println("\nNURSE DETAILS:");
-                    System.out.println("  Department: " + assignedNurse.getDepartment());
-                    System.out.println("  Shift: " + assignedNurse.getShift());
-                    System.out.println("  Current Patients: " + assignedNurse.getCurrentPatientsCount() + 
-                                     "/" + assignedNurse.getMaxPatients());
-                    System.out.println("  Status: " + assignedNurse.getStatus());
-                }
-                
-                System.out.println("\nAssignment successfully recorded in system.");
-                System.out.println("=".repeat(80));
-                
-                // Update nurse combo box
-                updateNurseComboBox();
+                // Print database status
+                printNurseDatabaseStatus();
                 
                 return true;
             } else {
-                validationLabel.setText("Failed to assign nurse. Nurse may be at capacity.");
+                validationLabel.setText("Failed to assign nurse. The nurse might be at capacity.");
                 return false;
             }
             
         } catch (Exception e) {
-            validationLabel.setText("Error: " + e.getMessage());
+            validationLabel.setText("An error occurred: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
     
+    // Helper method to find nurse by ID
+    private Nurses findNurseById(String nurseId) {
+        List<Nurses> allNurses = nurseDatabase.getAllNurses();
+        for (Nurses nurse : allNurses) {
+            if (nurse.getId().equals(nurseId)) {
+                return nurse;
+            }
+        }
+        return null;
+    }
+    
+    // Method to print nurse database status
+    private void printNurseDatabaseStatus() {
+        List<Nurses> allNurses = nurseDatabase.getAllNurses();
+        int availableNurses = nurseDatabase.getAvailableNurses().size();
+        int totalAssignments = 0;
+        
+        for (Nurses nurse : allNurses) {
+            totalAssignments += nurse.getCurrentPatientsCount();
+        }
+        
+        System.out.println("\n📊 NURSE DATABASE STATUS");
+        System.out.println("Total Nurses: " + allNurses.size());
+        System.out.println("Available Nurses: " + availableNurses);
+        System.out.println("Total Patient Assignments: " + totalAssignments);
+    }
+    
     private void showAllAssignments() {
         List<Nurses> allNurses = nurseDatabase.getAllNurses();
-        
-        StringBuilder assignmentsInfo = new StringBuilder();
-        assignmentsInfo.append("CURRENT NURSE ASSIGNMENTS\n");
-        assignmentsInfo.append("=".repeat(100)).append("\n\n");
-        
         int totalAssignments = 0;
         int nursesWithAssignments = 0;
         
+        StringBuilder assignmentsInfo = new StringBuilder();
+        assignmentsInfo.append("CURRENT NURSE ASSIGNMENTS\n");
+        assignmentsInfo.append("=".repeat(60)).append("\n\n");
+        
         for (Nurses nurse : allNurses) {
-            // Check if nurse has patients assigned (using getCurrentPatientsCount)
-            if (nurse.getCurrentPatientsCount() > 0) {
+            int patientCount = nurse.getCurrentPatientsCount();
+            if (patientCount > 0) {
                 nursesWithAssignments++;
-                totalAssignments += nurse.getCurrentPatientsCount();
+                totalAssignments += patientCount;
                 
                 assignmentsInfo.append("Nurse: ").append(nurse.getName())
-                              .append(" (ID: ").append(nurse.getId()).append(")\n");  // Use getId()
-                assignmentsInfo.append("Department: ").append(nurse.getDepartment())
-                              .append(" | Shift: ").append(nurse.getShift()).append("\n");
-                assignmentsInfo.append("Status: ").append(nurse.getStatus())
-                              .append(" | Patients: ").append(nurse.getCurrentPatientsCount())
+                              .append(" (ID: ").append(nurse.getId()).append(")\n");
+                assignmentsInfo.append("Patients Assigned: ").append(patientCount)
                               .append("/").append(nurse.getMaxPatients()).append("\n");
-                
-                assignmentsInfo.append("Number of assigned patients: ").append(nurse.getCurrentPatientsCount()).append("\n");
-                assignmentsInfo.append("-".repeat(100)).append("\n");
+                assignmentsInfo.append("-".repeat(40)).append("\n");
             }
         }
         
         if (totalAssignments == 0) {
             assignmentsInfo.append("No active nurse assignments found.\n");
         } else {
-            assignmentsInfo.append("\nSUMMARY:\n");
-            assignmentsInfo.append("  Total nurses with assignments: ").append(nursesWithAssignments).append("\n");
-            assignmentsInfo.append("  Total patient assignments: ").append(totalAssignments).append("\n");
-            assignmentsInfo.append("  Assignment rate: ").append(String.format("%.1f%%", 
-                (nursesWithAssignments * 100.0 / allNurses.size()))).append("\n");
+            assignmentsInfo.append("\n📊 SUMMARY:\n");
+            assignmentsInfo.append("Nurses with Assignments: ").append(nursesWithAssignments).append("/").append(allNurses.size()).append("\n");
+            assignmentsInfo.append("Total Patient Assignments: ").append(totalAssignments).append("\n");
         }
         
-        // Show in a dialog
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Current Assignments");
         alert.setHeaderText("Nurse-Patient Assignments");
-        
-        TextArea textArea = new TextArea(assignmentsInfo.toString());
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-        textArea.setPrefRowCount(20);
-        textArea.setPrefColumnCount(100);
-        textArea.setStyle("-fx-font-family: 'Monospaced'; -fx-font-size: 12px;");
-        
-        alert.getDialogPane().setContent(textArea);
-        alert.getDialogPane().setPrefSize(800, 500);
+        alert.setContentText(assignmentsInfo.toString());
         alert.showAndWait();
     }
     
@@ -474,54 +403,46 @@ public class AssignNurseForm {
         patientIdField.clear();
         patientNameField.clear();
         patientNameField.setStyle("-fx-background-color: #ecf0f1;");
-        nurseIdField.clear();
-        nurseNameField.clear();
-        nurseIdField.setStyle("-fx-background-color: #ecf0f1;");
-        nurseNameField.setStyle("-fx-background-color: #ecf0f1;");
-        assignmentDetailsArea.clear();
-        updateNurseComboBox();
+        nurseComboBox.setValue(null);
+        patientIdField.setStyle("");
+        nurseComboBox.setStyle("");
     }
     
     private void showSuccessAlert() {
-        String nurseId = nurseIdField.getText();
-        String nurseName = nurseNameField.getText();
-        String patientId = patientIdField.getText();
-        String patientName = patientNameField.getText();
+        int totalNurses = nurseDatabase.getAllNurses().size();
+        int availableNurses = nurseDatabase.getAvailableNurses().size();
+        int totalAssignments = 0;
         
-        // Get nurse details by searching through all nurses
-        Nurses nurse = null;
-        List<Nurses> allNurses = nurseDatabase.getAllNurses();
-        for (Nurses n : allNurses) {
-            // Use getId() to compare
-            if (n.getId().equalsIgnoreCase(nurseId)) {
-                nurse = n;
-                break;
-            }
-        }
-        
-        String workloadInfo = "";
-        if (nurse != null) {
-            workloadInfo = "\nNurse workload: " + nurse.getCurrentPatientsCount() + 
-                          "/" + nurse.getMaxPatients() + " patients";
+        for (Nurses nurse : nurseDatabase.getAllNurses()) {
+            totalAssignments += nurse.getCurrentPatientsCount();
         }
         
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Assignment Successful");
-        alert.setHeaderText("✅ Nurse Assigned to Patient");
+        alert.setTitle("Success");
+        alert.setHeaderText("✅ Nurse Assigned Successfully");
         
-        String content = "Nurse has been successfully assigned to the patient.\n\n" +
-                        "PATIENT INFORMATION:\n" +
-                        "  ID: " + patientId + "\n" +
-                        "  Name: " + patientName + "\n\n" +
-                        "NURSE INFORMATION:\n" +
-                        "  ID: " + nurseId + "\n" +
-                        "  Name: " + nurseName + "\n" +
-                        workloadInfo + "\n\n" +
-                        "Assignment has been recorded in the system.";
+        String content = String.format(
+            "Nurse has been successfully assigned to the patient.\n\n" +
+            "Database Status:\n" +
+            "• Total Nurses: %d\n" +
+            "• Available Nurses: %d\n" +
+            "• Total Assignments: %d\n\n" +
+            "You can view all assignments by clicking 'View Assignments'.",
+            totalNurses,
+            availableNurses,
+            totalAssignments
+        );
         
         alert.setContentText(content);
         alert.showAndWait();
-        clearForm();
+    }
+    
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
     
     private TextField createTextField(double width, String prompt) {

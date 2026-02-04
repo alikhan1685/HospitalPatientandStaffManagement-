@@ -18,7 +18,7 @@ public class AddNurseForm {
     private TextField phoneField;
     private TextField licenseField;
     private TextField qualificationField;
-   
+  
     public AddNurseForm() {
         initializeForm();
     }

@@ -396,7 +396,7 @@ public class GetPatientForm {
             alert.showAndWait();
         }
     }
-    
+   
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);

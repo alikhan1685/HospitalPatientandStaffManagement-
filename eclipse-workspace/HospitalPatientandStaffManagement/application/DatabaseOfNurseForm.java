@@ -157,7 +157,7 @@ public class DatabaseOfNurseForm {
             FXCollections.observableArrayList(NurseDatabase.getInstance().getAllNurses())
         );
         nurseTable.refresh();
-        
+       
         // Show summary statistics
         int totalNurses = NurseDatabase.getInstance().getNurseCount();
         int availableNurses = NurseDatabase.getInstance().getAvailableNurseCount();

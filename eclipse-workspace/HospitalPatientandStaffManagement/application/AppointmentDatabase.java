@@ -11,7 +11,7 @@ public class AppointmentDatabase {
     
     private AppointmentDatabase() {
         appointments = new ArrayList<>();
-        initializeSampleAppointments();
+    
     }
     
     public static AppointmentDatabase getInstance() {
@@ -58,66 +58,6 @@ public class AppointmentDatabase {
             }
         }
         return count;
-    }
-    
-    private void initializeSampleAppointments() {
-        if (appointments.isEmpty()) {
-            System.out.println("📝 Initializing sample appointment data...");
-            
-            // Sample appointments
-            appointments.add(new Appointment(
-                "APT-1001",
-                "P001",
-                "John Smith",
-                "Dr. Smith - Cardiology",
-                "Initial Consultation",
-                "Cardiology Department",
-                "Routine - Non-urgent",
-                LocalDate.now().plusDays(2),
-                "10:30 AM",
-                "5550123456",
-                "Room 101",
-                "Chest pain and shortness of breath",
-                "Patient has family history of heart disease",
-                "Scheduled"
-            ));
-            
-            appointments.add(new Appointment(
-                "APT-1002",
-                "P002",
-                "Emma Johnson",
-                "Dr. Williams - Pediatrics",
-                "Regular Check-up",
-                "Pediatrics Department",
-                "Routine - Non-urgent",
-                LocalDate.now().plusDays(3),
-                "2:00 PM",
-                "5550234567",
-                "Room 205",
-                "Annual pediatric check-up",
-                "Vaccination needed",
-                "Confirmed"
-            ));
-            
-            appointments.add(new Appointment(
-                "APT-1003",
-                "P003",
-                "Robert Brown",
-                "Dr. Wilson - Surgery",
-                "Pre-surgical Consultation",
-                "Surgery Department",
-                "Urgent - Within 48 hours",
-                LocalDate.now().plusDays(1),
-                "9:00 AM",
-                "5550345678",
-                "Surgical Clinic A",
-                "Appendectomy preparation",
-                "Patient allergic to penicillin",
-                "In Progress"
-            ));
-            
-            System.out.println("✅ " + appointments.size() + " sample appointments added.");
-        }
     }
     
     public void printAllAppointments() {

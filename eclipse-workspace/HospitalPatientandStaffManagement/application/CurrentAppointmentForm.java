@@ -210,7 +210,7 @@ public class CurrentAppointmentForm {
         // Set the items to table
         appointmentTable.setItems(appointmentData);
         appointmentTable.refresh();
-        
+       
         // Show summary statistics
         int totalAppointments = AppointmentDatabase.getInstance().getAppointmentCount();
         int scheduledAppointments = AppointmentDatabase.getInstance().getScheduledAppointmentCount();

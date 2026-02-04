@@ -1,10 +1,12 @@
 package application;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import java.time.LocalDate;
 import java.util.List;
+
 public class AddTreatmentForm {
     private VBox formContainer;
     private TextField treatmentIdField;
@@ -17,11 +19,16 @@ public class AddTreatmentForm {
     private TextArea medicationsArea;
     private PatientDatabase patientDatabase;
     private TreatmentDatabase treatmentDatabase;
+    private DoctorDatabase doctorDatabase;
+    private Button refreshDoctorsButton;
+    
     public AddTreatmentForm() {
         patientDatabase = PatientDatabase.getInstance();
         treatmentDatabase = TreatmentDatabase.getInstance(); 
+        doctorDatabase = DoctorDatabase.getInstance();
         initializeForm();
-    }
+    } 
+    
     private void initializeForm() {
         // Create form container
         formContainer = new VBox();
@@ -69,17 +76,17 @@ public class AddTreatmentForm {
         treatmentTypeComboBox.setPromptText("Select treatment type");
         treatmentTypeComboBox.setPrefWidth(250);
         
-        // Doctor ComboBox
+        // Doctor ComboBox with refresh button
         doctorComboBox = new ComboBox<>();
-        doctorComboBox.getItems().addAll(
-            "Dr. Ahmed Khan - Cardiology",
-            "Dr. Farooq - Neurology", 
-            "Dr. Aleem - Pediatrics",
-            "Dr. Mahmood - Orthopedics",
-            "Dr. Alizay - Dermatology"
-        );
-        doctorComboBox.setPromptText("Select attending doctor");
         doctorComboBox.setPrefWidth(250);
+        
+        refreshDoctorsButton = new Button("🔄");
+        refreshDoctorsButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        refreshDoctorsButton.setTooltip(new Tooltip("Refresh available doctors list"));
+        refreshDoctorsButton.setOnAction(e -> updateDoctorComboBox());
+        
+        HBox doctorContainer = new HBox(10);
+        doctorContainer.getChildren().addAll(doctorComboBox, refreshDoctorsButton);
         
         // Date Picker
         startDatePicker = new DatePicker();
@@ -113,6 +120,9 @@ public class AddTreatmentForm {
                 } else {
                     patientNameField.setStyle("-fx-background-color: #d4edda;");
                     patientIdField.setStyle("-fx-border-color: #28a745; -fx-border-width: 1px;");
+                    
+                    // If patient is found, also try to get their assigned doctor
+                    setDoctorFromPatient(patientId);
                 }
             } else {
                 patientNameField.clear();
@@ -132,9 +142,13 @@ public class AddTreatmentForm {
                 
                 if (patientName.equals("Patient not found")) {
                     showAlert("Patient Not Found", "No patient found with ID: " + patientId);
+                } else {
+                    // If patient is found, try to get their assigned doctor
+                    setDoctorFromPatient(patientId);
                 }
             }
         });        
+        
         HBox patientIdContainer = new HBox(5);
         patientIdContainer.getChildren().addAll(patientIdField, searchPatientButton);
         
@@ -162,7 +176,7 @@ public class AddTreatmentForm {
         
         // Row 3: Doctor
         form.add(createLabel("Attending Doctor:*"), 0, row);
-        form.add(doctorComboBox, 1, row);
+        form.add(doctorContainer, 1, row, 2, 1);
         row++;
         
         // Row 4: Treatment Plan
@@ -217,8 +231,96 @@ public class AddTreatmentForm {
         
         // Add components to container
         formContainer.getChildren().addAll(title, form, buttonContainer);
+        
+        // Initialize the doctor combobox
+        updateDoctorComboBox();
     }
     
+    // Method to update doctor combobox with available doctors from DoctorDatabase
+    private void updateDoctorComboBox() {
+        doctorComboBox.getItems().clear();
+        
+        List<Staff> availableDoctors = doctorDatabase.getAvailableDoctors();
+        
+        if (availableDoctors.isEmpty()) {
+            doctorComboBox.getItems().add("No available doctors");
+            doctorComboBox.setValue("No available doctors");
+            doctorComboBox.setPromptText("No doctors available");
+        } else {
+            for (Staff doctor : availableDoctors) {
+                // Format: "Dr. Name (Specialization) - ID: DOC-001"
+                String displayText = String.format("%s (%s) - ID: %s", 
+                    doctor.getName(),
+                    doctor.getSpecialization(),
+                    doctor.getStaffId()
+                );
+                doctorComboBox.getItems().add(displayText);
+            }
+            doctorComboBox.setPromptText("Select attending doctor");
+            
+            // Sort alphabetically
+            doctorComboBox.getItems().sort(String::compareTo);
+        }
+    }
+    
+    // Method to set doctor based on patient's assigned doctor
+    private void setDoctorFromPatient(String patientId) {
+        // First, try to get the patient from database
+        List<Patients> patients = patientDatabase.searchById(patientId);
+        
+        if (!patients.isEmpty()) {
+            Patients patient = patients.get(0);
+            String assignedDoctorName = patient.getAssignedDoctorName();
+            
+            if (assignedDoctorName != null && !assignedDoctorName.isEmpty()) {
+                // Try to find this doctor in the doctor combobox
+                for (String doctorItem : doctorComboBox.getItems()) {
+                    if (doctorItem.startsWith(assignedDoctorName)) {
+                        doctorComboBox.setValue(doctorItem);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Helper method to extract doctor name from combobox selection
+    private String extractDoctorName(String displayText) {
+        if (displayText == null || displayText.equals("No available doctors")) {
+            return null;
+        }
+        
+        try {
+            // Format: "Dr. Name (Specialization) - ID: DOC-001"
+            String[] parts = displayText.split(" \\(");
+            if (parts.length > 0) {
+                return parts[0].trim();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return displayText;
+    }
+    
+    // Helper method to extract doctor ID from combobox selection
+    private String extractDoctorId(String displayText) {
+        if (displayText == null || displayText.equals("No available doctors")) {
+            return null;
+        }
+        
+        try {
+            // Format: "Dr. Name (Specialization) - ID: DOC-001"
+            if (displayText.contains("ID: ")) {
+                String[] parts = displayText.split("ID: ");
+                if (parts.length > 1) {
+                    return parts[1].trim();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     
     private TextField createTextField(double width, String prompt) {
         TextField field = new TextField();
@@ -279,7 +381,6 @@ public class AddTreatmentForm {
     }
     
     private boolean saveTreatment(TextField durationField, TextField frequencyField, Label validationLabel) {
-    	
         // First validate the patient exists
         String patientId = patientIdField.getText().trim();
         String patientName = patientNameField.getText();
@@ -287,6 +388,14 @@ public class AddTreatmentForm {
         if (patientName.equals("Patient not found") || patientName.isEmpty()) {
             validationLabel.setText("Error: Patient not found. Please enter a valid Patient ID.");
             patientIdField.setStyle("-fx-border-color: #ff0000; -fx-border-width: 2px;");
+            return false;
+        }
+        
+        // Validate doctor selection
+        String selectedDoctor = doctorComboBox.getValue();
+        if (selectedDoctor == null || selectedDoctor.equals("No available doctors")) {
+            validationLabel.setText("Please select an available doctor.");
+            doctorComboBox.setStyle("-fx-border-color: #ff0000; -fx-border-width: 2px;");
             return false;
         }
         
@@ -299,12 +408,21 @@ public class AddTreatmentForm {
             // Get form values
             String treatmentId = treatmentIdField.getText();
             String treatmentType = treatmentTypeComboBox.getValue();
-            String doctor = doctorComboBox.getValue();
+            String doctorDisplay = doctorComboBox.getValue();
             String startDate = startDatePicker.getValue().toString();
             String treatmentPlan = treatmentPlanArea.getText();
             String medications = medicationsArea.getText();
             String duration = durationField.getText();
             String frequency = frequencyField.getText();
+            
+            // Extract doctor name and ID
+            String doctorName = extractDoctorName(doctorDisplay);
+            String doctorId = extractDoctorId(doctorDisplay);
+            
+            if (doctorName == null) {
+                validationLabel.setText("Invalid doctor selection.");
+                return false;
+            }
             
             // Display saved information
             System.out.println("\n" + "=".repeat(60));
@@ -314,24 +432,25 @@ public class AddTreatmentForm {
             System.out.println("Patient ID: " + patientId);
             System.out.println("Patient Name: " + patientName);
             System.out.println("Treatment Type: " + treatmentType);
-            System.out.println("Attending Doctor: " + doctor);
+            System.out.println("Attending Doctor: " + doctorName);
+            System.out.println("Doctor ID: " + doctorId);
             System.out.println("Start Date: " + startDate);
             System.out.println("Duration: " + duration);
             System.out.println("Frequency: " + frequency);
             
+            // Create treatment object
             Treatments treatment = new Treatments(
-            	    treatmentId,
-            	    patientId,
-            	    patientName,
-            	    doctor,
-            	    treatmentType,
-            	    duration,
-            	    "Active"
-            	);
-
-            	// ✅ SAVE INTO DATABASE
-            	treatmentDatabase.addTreatment(treatment);
-
+                treatmentId,
+                patientId,
+                patientName,
+                doctorName,
+                treatmentType,
+                duration,
+                "Active"
+            );
+            
+            // Save into database
+            treatmentDatabase.addTreatment(treatment);
             
             System.out.println("\n--- TREATMENT PLAN ---");
             System.out.println(treatmentPlan);
@@ -357,10 +476,14 @@ public class AddTreatmentForm {
             validationLabel.setText("");
             clearForm(durationField, frequencyField);
             
+            // Refresh doctor list after assignment
+            updateDoctorComboBox();
+            
             return true;
             
         } catch (Exception e) {
             validationLabel.setText("An error occurred: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -385,6 +508,7 @@ public class AddTreatmentForm {
         frequencyField.clear();
         patientNameField.setStyle("-fx-background-color: #ecf0f1;");
         patientIdField.setStyle("");
+        doctorComboBox.setStyle("");
     }
     
     private void showSuccessAlert() {
@@ -394,11 +518,33 @@ public class AddTreatmentForm {
         
         String patientName = patientNameField.getText();
         String treatmentType = treatmentTypeComboBox.getValue();
+        String doctorName = extractDoctorName(doctorComboBox.getValue());
         
-        String content = "Treatment for patient '" + patientName + "' has been saved.\n\n" +
-                       "Treatment Type: " + treatmentType + "\n" +
-                       "Patient ID: " + patientIdField.getText() + "\n" +
-                       "Treatment ID: " + treatmentIdField.getText();
+        // Get database statistics
+        int totalTreatments = treatmentDatabase.getTreatments().size();
+        int totalPatients = patientDatabase.getAllPatients().size();
+        int availableDoctors = doctorDatabase.getAvailableDoctorCount();
+        
+        String content = String.format(
+            "Treatment for patient '%s' has been saved.\n\n" +
+            "Treatment Details:\n" +
+            "• Type: %s\n" +
+            "• Patient ID: %s\n" +
+            "• Doctor: %s\n" +
+            "• Treatment ID: %s\n\n" +
+            "Database Statistics:\n" +
+            "• Total Treatments: %d\n" +
+            "• Total Patients: %d\n" +
+            "• Available Doctors: %d",
+            patientName,
+            treatmentType,
+            patientIdField.getText(),
+            doctorName != null ? doctorName : "Not specified",
+            treatmentIdField.getText(),
+            totalTreatments,
+            totalPatients,
+            availableDoctors
+        );
         
         alert.setContentText(content);
         alert.showAndWait();

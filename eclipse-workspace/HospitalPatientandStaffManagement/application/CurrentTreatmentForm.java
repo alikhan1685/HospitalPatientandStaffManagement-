@@ -22,7 +22,6 @@ public class CurrentTreatmentForm {
         container.setSpacing(20);
         container.setPadding(new Insets(20));
         container.setStyle("-fx-background-color: #f8f9fa;");
-
         Label title = new Label("Current Treatment Status");
         title.setFont(new Font("Arial", 28));
         title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");

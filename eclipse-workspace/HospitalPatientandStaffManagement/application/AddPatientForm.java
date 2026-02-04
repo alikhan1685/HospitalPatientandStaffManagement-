@@ -1,10 +1,10 @@
 package application;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import java.util.Arrays;
 import java.util.List;
 
 public class AddPatientForm {
@@ -19,6 +19,7 @@ public class AddPatientForm {
     private TextArea medicalHistoryArea;
     private TextField emergencyContactField;
     private TextField bloodGroupField;
+    private Button refreshDoctorsButton;
   
     public AddPatientForm() {
         initializeForm();
@@ -57,11 +58,19 @@ public class AddPatientForm {
         genderComboBox.setPromptText("Select gender");
         genderComboBox.setPrefWidth(200);
         
-        // Assign Doctor ComboBox
+        // Assign Doctor ComboBox with refresh button
         assignDoctorComboBox = new ComboBox<>();
-        initializeDoctorComboBox();
-        assignDoctorComboBox.setPromptText("Select a doctor");
         assignDoctorComboBox.setPrefWidth(250);
+        
+        // Refresh button for doctors combobox
+        refreshDoctorsButton = new Button("🔄");
+        refreshDoctorsButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        refreshDoctorsButton.setTooltip(new Tooltip("Refresh available doctors list"));
+        refreshDoctorsButton.setOnAction(e -> updateDoctorComboBox());
+        
+        // Create HBox for doctor selection with refresh button
+        HBox doctorSelectionBox = new HBox(10);
+        doctorSelectionBox.getChildren().addAll(assignDoctorComboBox, refreshDoctorsButton);
         
         // Medical History TextArea
         medicalHistoryArea = new TextArea();
@@ -91,7 +100,7 @@ public class AddPatientForm {
         form.add(bloodGroupField, 1, row++);
         
         form.add(createLabel("Assign Doctor:*"), 0, row);
-        form.add(assignDoctorComboBox, 1, row++);
+        form.add(doctorSelectionBox, 1, row++);
         
         form.add(createLabel("Medical History:"), 0, row);
         form.add(medicalHistoryArea, 1, row++);
@@ -126,17 +135,91 @@ public class AddPatientForm {
         
         // Add components to container
         formContainer.getChildren().addAll(title, form, buttonContainer);
+        
+        // Initialize the doctor combobox with available doctors
+        updateDoctorComboBox();
     }
     
-    private void initializeDoctorComboBox() {
-        List<String> doctors = Arrays.asList(
-            "Dr. Ahmed Khan - Cardiology",
-            "Dr. Farooq - Neurology", 
-            "Dr. Aleem - Pediatrics",
-            "Dr. Mahmood - Orthopedics",
-            "Dr. Alizay- Dermatology"
-        );
-        assignDoctorComboBox.getItems().addAll(doctors);
+    // Method to update the doctor combobox with available doctors from DoctorDatabase
+    private void updateDoctorComboBox() {
+        assignDoctorComboBox.getItems().clear();
+        
+        DoctorDatabase db = DoctorDatabase.getInstance();
+        List<Staff> availableDoctors = db.getAvailableDoctors();
+        
+        if (availableDoctors.isEmpty()) {
+            assignDoctorComboBox.getItems().add("No available doctors");
+            assignDoctorComboBox.setValue("No available doctors");
+            assignDoctorComboBox.setPromptText("No doctors available");
+        } else {
+            for (Staff doctor : availableDoctors) {
+                // Format: "Dr. Name (Specialization) - Available Patients: X"
+                String displayText = String.format("%s (%s) - Available", 
+                    doctor.getName(),
+                    doctor.getSpecialization()
+                );
+                assignDoctorComboBox.getItems().add(displayText);
+            }
+            assignDoctorComboBox.setPromptText("Select a doctor");
+            
+            // Optional: Sort the items alphabetically
+            assignDoctorComboBox.getItems().sort(String::compareTo);
+        }
+    }
+    
+    // Helper method to extract doctor name from combobox selection
+    private String extractDoctorName(String displayText) {
+        if (displayText == null || displayText.equals("No available doctors")) {
+            return null;
+        }
+        
+        try {
+            // Format: "Dr. Name (Specialization) - Available"
+            String[] parts = displayText.split(" \\(");
+            if (parts.length > 0) {
+                return parts[0].trim();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return displayText;
+    }
+    
+    // Helper method to extract doctor specialization from combobox selection
+    private String extractDoctorSpecialization(String displayText) {
+        if (displayText == null || displayText.equals("No available doctors")) {
+            return null;
+        }
+        
+        try {
+            // Format: "Dr. Name (Specialization) - Available"
+            String[] parts = displayText.split(" \\(");
+            if (parts.length > 1) {
+                // Remove the ")" and " - Available" part
+                String specializationPart = parts[1];
+                if (specializationPart.contains(") - Available")) {
+                    return specializationPart.replace(") - Available", "").trim();
+                }
+                return specializationPart.replace(")", "").trim();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    // Method to find doctor ID by name and specialization
+    private String findDoctorId(String doctorName, String specialization) {
+        DoctorDatabase db = DoctorDatabase.getInstance();
+        List<Staff> allDoctors = db.getAllDoctors();
+        
+        for (Staff doctor : allDoctors) {
+            if (doctor.getName().equals(doctorName) && 
+                doctor.getSpecialization().equals(specialization)) {
+                return doctor.getStaffId();
+            }
+        }
+        return null;
     }
     
     private TextField createTextField(double width, String prompt) {
@@ -167,7 +250,7 @@ public class AddPatientForm {
             String phone = phoneField.getText();
             String email = emailField.getText();
             String emergencyContact = emergencyContactField.getText();
-            String doctor = assignDoctorComboBox.getValue();
+            String selectedDoctor = assignDoctorComboBox.getValue();
             String medicalHistory = medicalHistoryArea.getText();
             String bloodGroup = bloodGroupField.getText();
             
@@ -187,13 +270,36 @@ public class AddPatientForm {
                 return false;
             }
             
-            // Create patient WITHOUT ID - let PatientDatabase generate it
+            // Check if a doctor is selected and available
+            if (selectedDoctor == null || selectedDoctor.equals("No available doctors")) {
+                validationLabel.setText("Please select an available doctor");
+                return false;
+            }
+            
+            // Extract doctor information
+            String doctorName = extractDoctorName(selectedDoctor);
+            String specialization = extractDoctorSpecialization(selectedDoctor);
+            
+            if (doctorName == null || specialization == null) {
+                validationLabel.setText("Invalid doctor selection");
+                return false;
+            }
+            
+            // Find doctor ID
+            String doctorId = findDoctorId(doctorName, specialization);
+            
+            if (doctorId == null) {
+                validationLabel.setText("Selected doctor not found in database");
+                return false;
+            }
+            
+            // Create patient
             Patients patient = new Patients(name, age, gender);
             patient.setAddress(address);
             patient.setPhone(phone);
             patient.setEmail(email);
             patient.setEmergencyContact(emergencyContact);
-            patient.setAssignedDoctorName(doctor);
+            patient.setAssignedDoctorName(doctorName);
             patient.setBloodGroup(bloodGroup);
             
             // Add medical history
@@ -201,26 +307,48 @@ public class AddPatientForm {
                 patient.addMedicalHistory(medicalHistory);
             }
             
-            // ADD THE PATIENT TO THE DATABASE - Database will assign ID
-            PatientDatabase.getInstance().addPatient(patient);
+            // Add patient to database
+            PatientDatabase patientDb = PatientDatabase.getInstance();
+            patientDb.addPatient(patient);
+            
+            // Get patient ID after it's generated by the database
+            String patientId = patient.getId();
+            
+            // Assign doctor to patient in DoctorDatabase
+            DoctorDatabase doctorDb = DoctorDatabase.getInstance();
+            boolean assignmentSuccess = doctorDb.assignDoctorToPatient(doctorId, patientId, name);
+            
+            if (assignmentSuccess) {
+                // Update doctor status or perform any additional logic
+                doctorDb.updateDoctorStatus(doctorId, "Active");
+            }
             
             // Display saved information in console
             System.out.println("\n=== PATIENT SAVED SUCCESSFULLY ===");
-            System.out.println("Patient ID: " + patient.getId());
-            System.out.println("Name: " + patient.getName());
-            System.out.println("Age: " + patient.getAge());
-            System.out.println("Gender: " + patient.getGender());
-            System.out.println("Phone: " + patient.getPhone());
-            System.out.println("Address: " + patient.getAddress());
-            System.out.println("Assigned Doctor: " + patient.getAssignedDoctorName());
-            System.out.println("Blood Group: " + patient.getBloodGroup());
-            if (patient.getMedicalHistory() != null && !patient.getMedicalHistory().isEmpty()) {
-                System.out.println("Medical History: " + patient.getMedicalHistory());
+            System.out.println("Patient ID: " + patientId);
+            System.out.println("Name: " + name);
+            System.out.println("Age: " + age);
+            System.out.println("Gender: " + gender);
+            System.out.println("Phone: " + phone);
+            System.out.println("Address: " + address);
+            System.out.println("Assigned Doctor: " + doctorName + " (" + specialization + ")");
+            System.out.println("Doctor ID: " + doctorId);
+            System.out.println("Blood Group: " + bloodGroup);
+            
+            if (medicalHistory != null && !medicalHistory.trim().isEmpty()) {
+                System.out.println("Medical History: " + medicalHistory);
             }
             
+            System.out.println("Doctor Assignment: " + (assignmentSuccess ? "SUCCESS" : "FAILED"));
+            
             // Display database status
-            System.out.println("Total patients in database: " + PatientDatabase.getInstance().getAllPatients().size());
+            System.out.println("Total patients in database: " + patientDb.getAllPatients().size());
+            System.out.println("Total doctors in database: " + doctorDb.getDoctorCount());
+            System.out.println("Available doctors: " + doctorDb.getAvailableDoctorCount());
             System.out.println("=== END ===");
+            
+            // Print all assignments
+            doctorDb.printAllAssignments();
             
             // Clear validation message
             validationLabel.setText("");
@@ -230,16 +358,29 @@ public class AddPatientForm {
         } catch (NumberFormatException e) {
             validationLabel.setText("Age must be a valid number");
             return false;
+        } catch (Exception e) {
+            validationLabel.setText("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
     }
     
     private boolean validateForm() {
-        return !nameField.getText().isEmpty() &&
-               !ageField.getText().isEmpty() &&
-               genderComboBox.getValue() != null &&
-               !addressField.getText().isEmpty() &&
-               !phoneField.getText().isEmpty() &&
-               assignDoctorComboBox.getValue() != null;
+        // Check basic required fields
+        boolean basicFieldsValid = !nameField.getText().isEmpty() &&
+                                  !ageField.getText().isEmpty() &&
+                                  genderComboBox.getValue() != null &&
+                                  !addressField.getText().isEmpty() &&
+                                  !phoneField.getText().isEmpty() &&
+                                  assignDoctorComboBox.getValue() != null;
+        
+        if (!basicFieldsValid) {
+            return false;
+        }
+        
+        // Additional check for doctor selection
+        String selectedDoctor = assignDoctorComboBox.getValue();
+        return selectedDoctor != null && !selectedDoctor.equals("No available doctors");
     }
     
     private void clearForm() {
@@ -253,16 +394,40 @@ public class AddPatientForm {
         bloodGroupField.clear();
         assignDoctorComboBox.setValue(null);
         medicalHistoryArea.clear();
+        
+        // Refresh the doctor list
+        updateDoctorComboBox();
     }
     
     private void showSuccessAlert() {
+        PatientDatabase patientDb = PatientDatabase.getInstance();
+        DoctorDatabase doctorDb = DoctorDatabase.getInstance();
+        
+        // Get the last added patient
+        List<Patients> allPatients = patientDb.getAllPatients();
+        String patientId = "";
+        if (!allPatients.isEmpty()) {
+            patientId = allPatients.get(allPatients.size() - 1).getId();
+        }
+        
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText("Patient Saved Successfully");
-        alert.setContentText("Patient information has been saved to the system.\nPatient ID: " + 
-            PatientDatabase.getInstance().getAllPatients().get(
-                PatientDatabase.getInstance().getPatientCount() - 1
-            ).getId());
+        
+        String alertMessage = String.format(
+            "Patient information has been saved to the system.\n" +
+            "Patient ID: %s\n\n" +
+            "Database Status:\n" +
+            "• Total Patients: %d\n" +
+            "• Total Doctors: %d\n" +
+            "• Available Doctors: %d",
+            patientId,
+            patientDb.getPatientCount(),
+            doctorDb.getDoctorCount(),
+            doctorDb.getAvailableDoctorCount()
+        );
+        
+        alert.setContentText(alertMessage);
         alert.showAndWait();
     }
     
