@@ -32,8 +32,8 @@ public class AddTreatmentForm {
     private void initializeForm() {
         // Create form container
         formContainer = new VBox();
-        formContainer.setSpacing(20);
-        formContainer.setPadding(new Insets(20));
+        formContainer.setSpacing(15);
+        formContainer.setPadding(new Insets(10));
         formContainer.setStyle("-fx-background-color: #f8f9fa;");
         
         // Title
@@ -43,9 +43,9 @@ public class AddTreatmentForm {
         
         // Create form grid with proper column constraints
         GridPane form = new GridPane();
-        form.setVgap(15);
-        form.setHgap(20);
-        form.setPadding(new Insets(25));
+        form.setVgap(10);
+        form.setHgap(15);
+        form.setPadding(new Insets(5));
         form.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8; -fx-border-width: 1;");
         
         // Set column constraints for better layout
@@ -66,8 +66,8 @@ public class AddTreatmentForm {
         treatmentIdField.setEditable(false);
         treatmentIdField.setStyle("-fx-background-color: #ecf0f1; -fx-font-weight: bold;");
         
-        patientIdField = createTextField(150, "Enter patient ID (e.g., P1002024)");
-        patientNameField = createTextField(150, "Patient name (auto-filled)");
+        patientIdField = createTextField(100, "Enter patient ID");
+        patientNameField = createTextField(100, "Patient name (auto-filled)");
         patientNameField.setEditable(false);
         patientNameField.setStyle("-fx-background-color: #ecf0f1;");
         
@@ -86,7 +86,7 @@ public class AddTreatmentForm {
             "Nutrition Therapy"
         );
         treatmentTypeComboBox.setPromptText("Select treatment type");
-        treatmentTypeComboBox.setPrefWidth(150);
+        treatmentTypeComboBox.setPrefWidth(200);
         
         // Doctor ComboBox with refresh button
         doctorComboBox = new ComboBox<>();
@@ -97,7 +97,7 @@ public class AddTreatmentForm {
         refreshDoctorsButton.setTooltip(new Tooltip("Refresh available doctors list"));
         refreshDoctorsButton.setOnAction(e -> updateDoctorComboBox());
         
-        HBox doctorContainer = new HBox(10);
+        HBox doctorContainer = new HBox(15);
         doctorContainer.getChildren().addAll(doctorComboBox, refreshDoctorsButton);
         
         // Date Picker
@@ -108,13 +108,13 @@ public class AddTreatmentForm {
         // Text Areas
         treatmentPlanArea = new TextArea();
         treatmentPlanArea.setPrefRowCount(4);
-        treatmentPlanArea.setPrefWidth(530); // Spanning 2 columns minus gap
+        treatmentPlanArea.setPrefWidth(300); // Spanning 2 columns minus gap
         treatmentPlanArea.setPromptText("Enter treatment plan details...");
         treatmentPlanArea.setWrapText(true);
         
         medicationsArea = new TextArea();
         medicationsArea.setPrefRowCount(3);
-        medicationsArea.setPrefWidth(530); // Spanning 2 columns minus gap
+        medicationsArea.setPrefWidth(400); // Spanning 2 columns minus gap
         medicationsArea.setPromptText("Enter medications (one per line)...");
         medicationsArea.setWrapText(true);
         
@@ -152,26 +152,26 @@ public class AddTreatmentForm {
         row++;
         
         // Row 1: Patient Information
-        form.add(createLabel("Patient ID:*"), 0, row);
+        form.add(createLabel("Patient ID:"), 0, row);
         form.add(patientIdField, 1, row);
         form.add(createLabel("Patient Name:"), 2, row);
         form.add(patientNameField, 3, row);
         row++;
         
         // Row 2: Treatment Details
-        form.add(createLabel("Treatment Type:*"), 0, row);
+        form.add(createLabel("Treatment:"), 0, row);
         form.add(treatmentTypeComboBox, 1, row);
-        form.add(createLabel("Start Date:*"), 2, row);
+        form.add(createLabel("Start Date:"), 2, row);
         form.add(startDatePicker, 3, row);
         row++;
         
         // Row 3: Doctor
-        form.add(createLabel("Attending Doctor:*"), 0, row);
+        form.add(createLabel("Attending:"), 0, row);
         form.add(doctorContainer, 1, row, 3, 1); // Span 3 columns
         row++;
         
         // Row 4: Treatment Plan
-        form.add(createLabel("Treatment Plan:*"), 0, row);
+        form.add(createLabel("Plan:"), 0, row);
         form.add(treatmentPlanArea, 1, row, 3, 1); // Span 3 columns
         row++;
         

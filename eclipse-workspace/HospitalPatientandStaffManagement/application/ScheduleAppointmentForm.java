@@ -42,8 +42,8 @@ public class ScheduleAppointmentForm {
         // Create form grid
         GridPane form = new GridPane();
         form.setVgap(15);
-        form.setHgap(20);
-        form.setPadding(new Insets(25));
+        form.setHgap(10);
+        form.setPadding(new Insets(20));
         form.setStyle("-fx-background-color: white; -fx-border-color: #dee2e6; -fx-border-radius: 8; -fx-border-width: 1;");
         
         // Initialize form fields
@@ -80,13 +80,13 @@ public class ScheduleAppointmentForm {
             "Second Opinion"
         );
         appointmentTypeComboBox.setPromptText("Select appointment type");
-        appointmentTypeComboBox.setPrefWidth(200);
+        appointmentTypeComboBox.setPrefWidth(150);
         
         // Department ComboBox
         departmentComboBox = new ComboBox<>();
         // We'll populate this from doctor's specialization
         departmentComboBox.setPromptText("Department will auto-fill");
-        departmentComboBox.setPrefWidth(200);
+        departmentComboBox.setPrefWidth(300);
         departmentComboBox.setEditable(false);
         
         // Urgency ComboBox
@@ -177,35 +177,35 @@ public class ScheduleAppointmentForm {
         row++;
         
         // Row 1: Patient Information
-        form.add(createLabel("Patient ID:*"), 0, row);
+        form.add(createLabel("Patient ID:"), 0, row);
         form.add(patientIdField, 1, row);
         form.add(createLabel("Patient Name:"), 2, row);
         form.add(patientNameField, 3, row);
         row++;
         
         // Row 2: Doctor Selection
-        form.add(createLabel("Doctor:*"), 0, row);
+        form.add(createLabel("Doctor:"), 0, row);
         form.add(doctorComboBox, 1, row);
         form.add(createLabel("Department:*"), 2, row);
         form.add(departmentComboBox, 3, row);
         row++;
         
         // Row 3: Appointment Details
-        form.add(createLabel("Appointment Type:*"), 0, row);
+        form.add(createLabel("Appointment Type:"), 0, row);
         form.add(appointmentTypeComboBox, 1, row);
         form.add(createLabel("Date:*"), 2, row);
         form.add(appointmentDatePicker, 3, row);
         row++;
         
         // Row 4: Contact & Urgency
-        form.add(createLabel("Contact:*"), 0, row);
+        form.add(createLabel("Contact:"), 0, row);
         form.add(contactField, 1, row);
-        form.add(createLabel("Urgency:*"), 2, row);
+        form.add(createLabel("Urgency:"), 2, row);
         form.add(urgencyComboBox, 3, row);
         row++;
         
         // Row 5: Room/Clinic and Time
-        form.add(createLabel("Room/Clinic:"), 0, row);
+        form.add(createLabel("Room:"), 0, row);
         TextField roomField = createTextField(200, "e.g., Room 101, Clinic A");
         form.add(roomField, 1, row);
         form.add(createLabel("Time:"), 2, row);
@@ -214,7 +214,7 @@ public class ScheduleAppointmentForm {
         row++;
         
         // Row 6: Symptoms
-        form.add(createLabel("Symptoms/Reason:*"), 0, row);
+        form.add(createLabel("Reason:"), 0, row);
         form.add(symptomsArea, 1, row, 3, 1);
         row++;
         
